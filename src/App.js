@@ -32,7 +32,7 @@ function getTubeLines() {
   return new Promise(
     function(resolve, reject) {
 
-      var tubeStations = [];
+      var tubeLines = [];
 
       fetch("https://api.tfl.gov.uk/Line/Mode/tube")
         .then(function(response) {
@@ -43,14 +43,14 @@ function getTubeLines() {
           }
         })
         .then(function(json) {
-          json.forEach(function(station){
-            var simplifiedStation = {
-              id: station.id,
-              name: station.name
+          json.forEach(function(line){
+            var simplifiedLine = {
+              id: line.id,
+              name: line.name
             };
-            tubeStations.push(simplifiedStation);
+            tubeLines.push(simplifiedLine);
           })
-          resolve(tubeStations);
+          resolve(tubeLines);
         })
         .catch(function(err) {
           reject(err);
