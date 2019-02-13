@@ -10,7 +10,14 @@ class App extends Component {
   }
 
   render() {
-    getTubeLines();
+    getTubeLines()
+      .then(function (output){
+        console.log(JSON.stringify(output));
+      })
+      .catch(function(err) {
+        console.log(err);
+      });
+
     return (
       <div>
         Hello! Let's look for {this.state.station}!
@@ -22,25 +29,31 @@ class App extends Component {
 export default App;
 
 function getTubeLines() {
-  var tubeStations = [];
+  return new Promise(
+    function(resolve, reject) {
 
-  fetch("https://api.tfl.gov.uk/Line/Mode/tube")
-    .then(function(response) {
-        return response.json();
-      })
-      .then(function(json) {
-        json.forEach(function(station){
-          var simoplifiedStation = {
-            id: station.id,
-            name: station.name
-          };
-          tubeStations.push(simoplifiedStation);
+      var tubeStations = [];
+
+      fetch("https://api.tfl.gov.uk/Line/Mode/tube")
+        .then(function(response) {
+              return response.json();
+            })
+        .then(function(json) {
+          // TODO: Handle response.ok errors
+          json.forEach(function(station){
+            var simplifiedStation = {
+              id: station.id,
+              name: station.name
+            };
+            tubeStations.push(simplifiedStation);
+          })
+          resolve(tubeStations);
         })
-          // console.log(JSON.stringify(tubeStations));
-          return tubeStations;
-      })
-      .catch(function(err) {
-        console.log(err);
-      });
+        .catch(function(err) {
+          console.log(err);
+          reject(err);
+        });
 
+    }
+  )
 }
