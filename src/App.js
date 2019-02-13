@@ -16,7 +16,9 @@ class App extends Component {
         console.log(JSON.stringify(tubeLines));
         return tubeLines;
       })
-      .then(getTubeStations(tubeLines))
+      .then(function(tubeLines) {
+        return getTubeStations(tubeLines);
+      })
       .then(function (tubeStations){
         console.log("Tube stations:");
         console.log(JSON.stringify(tubeStations));
