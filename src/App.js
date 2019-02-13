@@ -11,21 +11,18 @@ class App extends Component {
 
   render() {
     getTubeLines()
-      .then(function (tubeLines){
+      .then(tubeLines => {
         console.log("Tube lines:");
         console.log(JSON.stringify(tubeLines));
         return tubeLines;
       })
-      .then(function(tubeLines) {
-        return getTubeStations(tubeLines);
-      })
-      .then(function (tubeStations){
+      .then(tubeLines => getTubeStations(tubeLines))
+      .then(tubeStations => {
         console.log("Tube stations:");
         console.log(JSON.stringify(tubeStations));
       })
-      .catch(function(err) {
-        console.log(err);
-      });
+      .catch(err => console.log(err)
+      );
 
     return (
       <div>
@@ -37,6 +34,7 @@ class App extends Component {
 
 export default App;
 
+// TODO: Refactor for arrow functions
 function getTubeLines() {
   return new Promise(
     function(resolve, reject) {
@@ -74,18 +72,48 @@ function getTubeStations(tubeLines) {
     function(resolve, reject) {
 
       var tubeStations = [];
+      var tubeStationFetchPromises = [];
+      // var tubeStationFetchResponseJsons = [];
 
-      tubeLines.forEach(function(line){
-        fetch("https://api.tfl.gov.uk/line/" + line.id + "/stoppoints")
-          .then(function(response) {
-            if(response.ok) {
-              return response.json();
-            } else {
-              throw new Error("Error getting list of tube stations from TFL API.")
-            }
-          })
-          .then(function(json) {
-            json.forEach(function(station){
+      tubeLines.forEach(line => {
+        tubeStationFetchPromises.push(
+          fetch("https://api.tfl.gov.uk/line/" + line.id + "/stoppoints")
+            .then(response => response.json())
+        );
+      })
+
+      // console.log("Just made the array of promises to resolve all. Here it is: "
+      //   + JSON.stringify(tubeStationFetchPromises)
+      // );
+
+      Promise.all(tubeStationFetchPromises)
+        .then(jsonResponses => {
+
+          // console.log("We got this many fetch responses: " +
+          //   responses.length);
+          // console.log("Here is the first fetch response: " +
+          //   JSON.stringify(responses[0]));
+
+          // responses.forEach(response => {
+          //   console.log("Dealing with a response now.");
+          //   if (response.ok) {
+          //     tubeStationFetchResponseJsons.push(response.json());
+          //   } else {
+          //     throw new Error("Error getting list of tube stations from TFL API.")
+          //   }
+          // })
+
+          console.log("OK, now we have " +
+            jsonResponses.length +
+            " response JSON objects to work with. Here they all are: "
+            + JSON.stringify(jsonResponses)
+            );
+
+          jsonResponses.forEach(json => {
+            // console.log("Dealing with a response JSON object now. Here's one of many: "
+              // + JSON.stringify(json));
+            Array.from(json).forEach(station => {
+              // console.log("Found a station object!");
               var simplifiedStation = {
                 id: station.id,
                 name: station.commonName,
@@ -93,12 +121,15 @@ function getTubeStations(tubeLines) {
               tubeStations.push(simplifiedStation);
             })
           })
-          .catch(function(err) {
-            reject(err);
-          });
-      })
 
-      resolve(tubeStations);
+          console.log("OK, there were " + tubeStations.length
+            + " stations found.");
+
+          resolve(tubeStations);
+
+        })
+        .catch(err => reject(err)
+        );
 
     }
   )
