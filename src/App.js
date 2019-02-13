@@ -1,19 +1,29 @@
 import React, { Component } from 'react';
+import Cookies from 'universal-cookie';
 import './App.css';
+
+const cookies = new Cookies();
 
 class App extends Component {
   constructor(props) {
     super(props);
+
+    // TODO: Refactor to consume a promise
+    var tubeStations = getTubeStationsFromCookies();
+
+    console.log(JSON.stringify(tubeStations));
+
+    // TODO: Store tubeStations in state
     this.state = {
       myStation: ""
     };
   }
 
   render() {
-    getTubeLines()
-      .then(tubeLines => getTubeStations(tubeLines))
-      .then(tubeStations => console.log("Tube stations: " + tubeStations.length))
-      .catch(err => console.log(err));
+    // getTubeLines()
+    //   .then(tubeLines => getTubeStations(tubeLines))
+    //   .then(tubeStations => console.log("Tube stations from API: " + tubeStations.length))
+    //   .catch(err => console.log(err));
 
     return (
       <div>
@@ -24,6 +34,30 @@ class App extends Component {
 }
 
 export default App;
+
+// TODO: Refactor to return promise
+function getTubeStationsFromCookies() {
+  if (cookies.get("tfl-arr")) {
+    console.log("Hey, there's a cookie!");
+    return JSON.parse(cookies.get("tfl-arr"));
+  } else {
+    console.log("No cookie set, getting stations manually.");
+
+    getTubeLines()
+      .then(tubeLines => getTubeStations(tubeLines))
+      .then(tubeStations => {
+        console.log("Tube stations from API: " + tubeStations.length);
+        cookies.set("tfl-arr", JSON.stringify(tubeStations),
+          {
+            path: "/",
+            maxAge: 31536000
+          }
+        );
+        return tubeStations;
+      })
+      .catch(err => console.log(err));
+  }
+}
 
 function getTubeLines() {
   return new Promise(
