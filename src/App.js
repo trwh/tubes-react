@@ -5,17 +5,14 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      station: "Richmond"
+      myStation: ""
     };
   }
 
   render() {
     getTubeLines()
       .then(tubeLines => getTubeStations(tubeLines))
-      .then(tubeStations => {
-        console.log("Tube stations:");
-        console.log(JSON.stringify(tubeStations));
-      })
+      .then(tubeStations => console.log("Tube stations: " + tubeStations.length))
       .catch(err => console.log(err));
 
     return (
@@ -66,7 +63,6 @@ function getTubeStations(tubeLines) {
       var tubeStationFetchPromises = [];
 
       tubeLines.forEach(line => {
-
         tubeStationFetchPromises.push(
           fetch("https://api.tfl.gov.uk/line/" + line.id + "/stoppoints")
             .then(response => {
@@ -77,14 +73,12 @@ function getTubeStations(tubeLines) {
               }
             })
         );
-
       })
 
       Promise.all(tubeStationFetchPromises)
         .then(jsonResponses => {
 
           jsonResponses.forEach(json => {
-
             Array.from(json).forEach(station => {
               var simplifiedStation = {
                 id: station.id,
@@ -92,12 +86,10 @@ function getTubeStations(tubeLines) {
               };
               tubeStations.push(simplifiedStation);
             })
-
           })
 
-          console.log("OK, there were " + tubeStations.length
-            + " stations found.");
-
+          // console.log("OK, there were " + tubeStations.length
+          //   + " stations found.");
           resolve(tubeStations);
 
         })
