@@ -36,10 +36,13 @@ function getTubeLines() {
 
       fetch("https://api.tfl.gov.uk/Line/Mode/tube")
         .then(function(response) {
-              return response.json();
-            })
+          if(response.ok) {
+            return response.json();
+          } else {
+            throw new Error("Error getting list of tube lines from TFL API.")
+          }
+        })
         .then(function(json) {
-          // TODO: Handle response.ok errors
           json.forEach(function(station){
             var simplifiedStation = {
               id: station.id,
@@ -50,7 +53,6 @@ function getTubeLines() {
           resolve(tubeStations);
         })
         .catch(function(err) {
-          console.log(err);
           reject(err);
         });
 
