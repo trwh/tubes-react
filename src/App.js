@@ -11,8 +11,15 @@ class App extends Component {
 
   render() {
     getTubeLines()
-      .then(function (output){
-        console.log(JSON.stringify(output));
+      .then(function (tubeLines){
+        console.log("Tube lines:");
+        console.log(JSON.stringify(tubeLines));
+        return tubeLines;
+      })
+      .then(getTubeStations(tubeLines))
+      .then(function (tubeStations){
+        console.log("Tube stations:");
+        console.log(JSON.stringify(tubeStations));
       })
       .catch(function(err) {
         console.log(err);
@@ -34,7 +41,7 @@ function getTubeLines() {
 
       var tubeLines = [];
 
-      fetch("https://api.tfl.gov.uk/Line/Mode/tube")
+      fetch("https://api.tfl.gov.uk/line/mode/tube")
         .then(function(response) {
           if(response.ok) {
             return response.json();
@@ -55,6 +62,41 @@ function getTubeLines() {
         .catch(function(err) {
           reject(err);
         });
+
+    }
+  )
+}
+
+function getTubeStations(tubeLines) {
+  return new Promise(
+    function(resolve, reject) {
+
+      var tubeStations = [];
+
+      tubeLines.forEach(function(line){
+        fetch("https://api.tfl.gov.uk/line/" + line.id + "/stoppoints")
+          .then(function(response) {
+            if(response.ok) {
+              return response.json();
+            } else {
+              throw new Error("Error getting list of tube stations from TFL API.")
+            }
+          })
+          .then(function(json) {
+            json.forEach(function(station){
+              var simplifiedStation = {
+                id: station.id,
+                name: station.commonName,
+              };
+              tubeStations.push(simplifiedStation);
+            })
+          })
+          .catch(function(err) {
+            reject(err);
+          });
+      })
+
+      resolve(tubeStations);
 
     }
   )
