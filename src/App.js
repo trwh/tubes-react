@@ -15,31 +15,21 @@ class App extends Component {
     //   .catch(err => console.log(err));
 
     this.state = {
-      tubeStations: [],
-      filteredTubeStations: [],
+      tubeStations,
+      filteredTubeStations: tubeStations,
       userTubeStations: [],
-      stationFilter: ""
+      filterValue: ""
     };
 
-    this.handleChange = this.handleChange.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
+    this.filterChange = this.filterChange.bind(this);
     this.addUserStation = this.addUserStation.bind(this);
+    this.clearUserStations = this.clearUserStations.bind(this);
+    this.clearFilterValue = this.clearFilterValue.bind(this);
   }
 
-  componentWillMount() {
-    this.setState({
-      tubeStations,
-      filteredTubeStations: tubeStations
-    })
-  }
-
-  handleChange(e) {
-    this.setState({ stationFilter: e.target.value });
+  filterChange(e) {
+    this.setState({ filterValue: e.target.value });
     this.filterStations(e);
-  }
-
-  handleSubmit(e) {
-    // TODO: Take station object and push it onto userTubeStations
   }
 
   filterStations(e) {
@@ -52,26 +42,36 @@ class App extends Component {
   }
 
   addUserStation(station) {
-    console.log("Wrueey!" + station.id);
-    this.setState(state => ({
-      userTubeStations: state.userTubeStations.concat(station),
-      stationFilter: ""
-    }));
+    if (!this.state.userTubeStations.includes(station)) {
+      station.arrivalsInfo = "Trains incoming!";
+      this.setState(state => ({
+        userTubeStations: state.userTubeStations.concat(station),
+      }));
+    }
+  }
+
+  clearUserStations() {
+    this.setState({ userTubeStations: [] });
+  }
+
+  clearFilterValue() {
+    this.setState({ filterValue: "" });
   }
 
   render() {
     return (
       <div>
-        <h3>Set local station(s)</h3>
         <UserStationList stations={this.state.userTubeStations} />
+        <button onClick={() => this.clearUserStations()}>Clear list</button>
         <form>
           <label htmlFor="station-filter">
             Name:
           </label>
           <input
             id="station-filter"
-            onChange={this.handleChange}
-            value={this.state.stationFilter}
+            onChange={this.filterChange}
+            onClick={this.clearFilterValue}
+            value={this.state.filterValue}
           />
         </form>
         <FilteredStationList
@@ -88,7 +88,10 @@ class UserStationList extends Component {
     return (
       <ul>
         {this.props.stations.map(station => (
-          <li key={station.id}>{station.name}</li>
+          <div key={station.id}>
+            <li key={station.id}>{station.name}</li>
+            <ArrivalsBoard arrivalsInfo={station.arrivalsInfo} />
+          </div>
         ))}
       </ul>
     );
@@ -106,6 +109,16 @@ class FilteredStationList extends Component {
           </div>
         ))}
       </ul>
+    );
+  }
+}
+
+class ArrivalsBoard extends Component {
+  render() {
+    return (
+      <div>
+      {this.props.arrivalsInfo}
+      </div>
     );
   }
 }
@@ -192,3 +205,4 @@ function getTubeStations(tubeLines) {
     }
   )
 }
+
