@@ -14,9 +14,9 @@ class App extends Component {
     //   .then(tubeStations => console.log("Tube stations from API: " + JSON.stringify(tubeStations)))
     //   .catch(err => console.log(err));
 
-    getArrivals("940GZZLURMD")
-      .then(arrivals => console.log("Arrivals information from API: " + JSON.stringify(arrivals)))
-      .catch(err => console.log(err));
+    // getArrivals([{"id":"940GZZLURMD","name":"Richmond"}])
+    //   .then(arrivals => console.log("Arrivals information from API: " + JSON.stringify(arrivals)))
+    //   .catch(err => console.log(err));
 
     this.state = {
       tubeStations,
@@ -25,10 +25,28 @@ class App extends Component {
       filterValue: ""
     };
 
+    // this.doGetArrivals = this.doGetArrivals.bind(this);
     this.filterChange = this.filterChange.bind(this);
     this.addUserStation = this.addUserStation.bind(this);
     this.clearUserStations = this.clearUserStations.bind(this);
     this.clearFilterValue = this.clearFilterValue.bind(this);
+  }
+
+  componentDidMount() {
+    this.doGetArrivals();
+
+    setTimeout(() => {
+      console.log("Wrueey");
+      this.componentDidMount();
+    }, 5000);
+  }
+
+  doGetArrivals() {
+    getArrivals(this.state.userTubeStations)
+      .then(updatedUserTubeStations => {
+        this.setState({ userTubeStations: updatedUserTubeStations });
+      })
+      .catch(err => console.log(err));
   }
 
   filterChange(e) {
@@ -47,10 +65,10 @@ class App extends Component {
 
   addUserStation(station) {
     if (!this.state.userTubeStations.includes(station)) {
-      // station.arrivalsInfo = getArrivals(station.id);
       this.setState(state => ({
         userTubeStations: state.userTubeStations.concat(station),
       }));
+    // this.doGetArrivals();
     }
   }
 
@@ -94,7 +112,7 @@ class UserStationList extends Component {
         {this.props.stations.map(station => (
           <div key={station.id}>
             <li key={station.id}>{station.name}</li>
-            <ArrivalsBoard arrivalsInfo={station.arrivalsInfo} />
+            <ArrivalsBoard arrivals={station.arrivals} />
           </div>
         ))}
       </ul>
@@ -121,7 +139,7 @@ class ArrivalsBoard extends Component {
   render() {
     return (
       <div>
-      {this.props.arrivalsInfo}
+      {JSON.stringify(this.props.arrivals)}
       </div>
     );
   }
@@ -210,7 +228,7 @@ function getTubeStations(tubeLines) {
   )
 }
 
-function getArrivals(stationId) {
+function getArrival(stationId) {
   return new Promise(
     function(resolve, reject) {
 
@@ -228,7 +246,7 @@ function getArrivals(stationId) {
         .then(json => {
           json.forEach(arrival => {
             if (!arrivalsIdsSeen.includes(arrival.id) &&
-              arrival.modeName == "tube") {
+              arrival.modeName === "tube") {
               var regex = / Platform \d$/gmi;
               var cleanedCurrentLocation = arrival.currentLocation.replace(
                 regex, "");
@@ -247,6 +265,69 @@ function getArrivals(stationId) {
           resolve(arrivals);
         })
         .catch(err => reject(err));
+
+    }
+  )
+}
+
+function getArrivals(stations) {
+  return new Promise(
+    function(resolve, reject) {
+
+      var updatedStations = [];
+      var arrivalsFetchPromises = [];
+
+      stations.forEach(station => {
+        arrivalsFetchPromises.push(
+          fetch("https://api.tfl.gov.uk/stoppoint/" + station.id + "/arrivals")
+            .then(response => {
+              if(response.ok) {
+                return response.json();
+              } else {
+                throw new Error("Error getting arrivals from TFL API.")
+              }
+            })
+        );
+      })
+
+      Promise.all(arrivalsFetchPromises)
+        .then(jsonResponses => {
+
+          for (var i = 0; i < jsonResponses.length; i++) {
+
+            let arrivals = [];
+            let arrivalsIdsSeen = [];
+
+            jsonResponses[i].forEach(arrival => {
+              if (!arrivalsIdsSeen.includes(arrival.id) &&
+                arrival.modeName === "tube") {
+                var regex = / Platform \d$/gmi;
+                var cleanedCurrentLocation = arrival.currentLocation.replace(
+                  regex, "");
+                var simplifiedArrival = {
+                  id: arrival.id,
+                  lineId: arrival.lineId,
+                  lineName: arrival.lineName,
+                  towards: arrival.towards,
+                  timeToStation: arrival.timeToStation,
+                  currentLocation: cleanedCurrentLocation
+                };
+                arrivalsIdsSeen.push(arrival.id);
+                arrivals.push(simplifiedArrival);
+              }
+            })
+
+            var updatedStation = stations[i];
+            updatedStation.arrivals = arrivals;
+            updatedStations.push(updatedStation);
+
+          }
+
+          resolve(updatedStations);
+
+        })
+        .catch(err => reject(err)
+        );
 
     }
   )
