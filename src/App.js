@@ -14,6 +14,10 @@ class App extends Component {
     //   .then(tubeStations => console.log("Tube stations from API: " + JSON.stringify(tubeStations)))
     //   .catch(err => console.log(err));
 
+    getArrivals("940GZZLURMD")
+      .then(arrivals => console.log("Arrivals information from API: " + JSON.stringify(arrivals)))
+      .catch(err => console.log(err));
+
     this.state = {
       tubeStations,
       filteredTubeStations: tubeStations,
@@ -43,7 +47,7 @@ class App extends Component {
 
   addUserStation(station) {
     if (!this.state.userTubeStations.includes(station)) {
-      station.arrivalsInfo = "Trains incoming!";
+      // station.arrivalsInfo = getArrivals(station.id);
       this.setState(state => ({
         userTubeStations: state.userTubeStations.concat(station),
       }));
@@ -140,7 +144,7 @@ function getTubeLines() {
           }
         })
         .then(json => {
-          json.forEach(function(line){
+          json.forEach(line => {
             var simplifiedLine = {
               id: line.id,
               name: line.name
@@ -183,7 +187,7 @@ function getTubeStations(tubeLines) {
             Array.from(json).forEach(station => {
               if (!tubeStationIdsSeen.includes(station.id)) {
                 var cleanedName = station.commonName.replace(
-                  "Underground Station", "");
+                  " Underground Station", "");
                 var simplifiedStation = {
                   id: station.id,
                   name: cleanedName
@@ -206,3 +210,44 @@ function getTubeStations(tubeLines) {
   )
 }
 
+function getArrivals(stationId) {
+  return new Promise(
+    function(resolve, reject) {
+
+      var arrivals = [];
+      var arrivalsIdsSeen = [];
+
+      fetch("https://api.tfl.gov.uk/stoppoint/" + stationId + "/arrivals")
+        .then(response => {
+          if(response.ok) {
+            return response.json();
+          } else {
+            throw new Error("Error getting arrivals from TFL API.")
+          }
+        })
+        .then(json => {
+          json.forEach(arrival => {
+            if (!arrivalsIdsSeen.includes(arrival.id) &&
+              arrival.modeName == "tube") {
+              var regex = / Platform \d$/gmi;
+              var cleanedCurrentLocation = arrival.currentLocation.replace(
+                regex, "");
+              var simplifiedArrival = {
+                id: arrival.id,
+                lineId: arrival.lineId,
+                lineName: arrival.lineName,
+                towards: arrival.towards,
+                timeToStation: arrival.timeToStation,
+                currentLocation: cleanedCurrentLocation
+              };
+              arrivalsIdsSeen.push(arrival.id);
+              arrivals.push(simplifiedArrival);
+            }
+          })
+          resolve(arrivals);
+        })
+        .catch(err => reject(err));
+
+    }
+  )
+}
