@@ -15,38 +15,57 @@ class App extends Component {
     //   .catch(err => console.log(err));
 
     this.state = {
+      tubeStations: [],
+      filteredTubeStations: [],
       userTubeStations: [],
-      inputText: ""
+      stationFilter: ""
     };
+
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
-  handleChange(e) {
-    this.setState({ inputText: e.target.value });
+  componentWillMount() {
+    this.setState({
+      tubeStations,
+      filteredTubeStations: tubeStations
+    })
   }
 
-  // TODO: Get ID of station submitted?
+  handleChange(e) {
+    this.setState({ stationFilter: e.target.value });
+    this.filterStations(e);
+  }
+
   handleSubmit(e) {
     e.preventDefault();
-    if (!this.state.inputText.length) {
+    if (!this.state.stationFilter.length) {
       return;
     }
     const newStation = {
-      name: this.state.inputText,
+      name: this.state.stationFilter,
       id: Date.now()
     };
     this.setState(state => ({
       userTubeStations: state.userTubeStations.concat(newStation),
-      inputText: ""
+      stationFilter: ""
     }));
+  }
+
+  filterStations(e) {
+    let filteredStations = this.state.tubeStations;
+    filteredStations = filteredStations.filter((station) => {
+      return station.name.toLowerCase().search(
+        e.target.value.toLowerCase()) !== -1;
+    });
+    this.setState({ filteredTubeStations: filteredStations });
   }
 
   render() {
     return (
       <div>
         <h3>Set local station(s)</h3>
-        <StationList stations={this.state.userTubeStations} />
+        <UserStationList stations={this.state.userTubeStations} />
         <form onSubmit={this.handleSubmit}>
           <label htmlFor="new-station">
             Station name:
@@ -54,18 +73,31 @@ class App extends Component {
           <input
             id="new-station"
             onChange={this.handleChange}
-            value={this.state.inputText}
+            value={this.state.stationFilter}
           />
           <button>
             Add station
           </button>
         </form>
+        <FilteredStationList stations={this.state.filteredTubeStations} />
       </div>
     );
   }
 }
 
-class StationList extends Component {
+class UserStationList extends Component {
+  render() {
+    return (
+      <ul>
+        {this.props.stations.map(station => (
+          <li key={station.id}>{station.name}</li>
+        ))}
+      </ul>
+    );
+  }
+}
+
+class FilteredStationList extends Component {
   render() {
     return (
       <ul>
@@ -138,6 +170,7 @@ function getTubeStations(tubeLines) {
 
       var tubeStations = [];
       var tubeStationFetchPromises = [];
+      var tubeStationIdsSeen = [];
 
       tubeLines.forEach(line => {
         tubeStationFetchPromises.push(
@@ -157,11 +190,16 @@ function getTubeStations(tubeLines) {
 
           jsonResponses.forEach(json => {
             Array.from(json).forEach(station => {
-              var simplifiedStation = {
-                id: station.id,
-                name: station.commonName,
-              };
-              tubeStations.push(simplifiedStation);
+              if (!tubeStationIdsSeen.includes(station.id)) {
+                var cleanedName = station.commonName.replace(
+                  "Underground Station", "");
+                var simplifiedStation = {
+                  id: station.id,
+                  name: cleanedName
+                };
+                tubeStationIdsSeen.push(station.id);
+                tubeStations.push(simplifiedStation);
+              }
             })
           })
 
