@@ -23,6 +23,7 @@ class App extends Component {
 
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.addUserStation = this.addUserStation.bind(this);
   }
 
   componentWillMount() {
@@ -38,18 +39,7 @@ class App extends Component {
   }
 
   handleSubmit(e) {
-    e.preventDefault();
-    if (!this.state.stationFilter.length) {
-      return;
-    }
-    const newStation = {
-      name: this.state.stationFilter,
-      id: Date.now()
-    };
-    this.setState(state => ({
-      userTubeStations: state.userTubeStations.concat(newStation),
-      stationFilter: ""
-    }));
+    // TODO: Take station object and push it onto userTubeStations
   }
 
   filterStations(e) {
@@ -61,25 +51,33 @@ class App extends Component {
     this.setState({ filteredTubeStations: filteredStations });
   }
 
+  addUserStation(station) {
+    console.log("Wrueey!" + station.id);
+    this.setState(state => ({
+      userTubeStations: state.userTubeStations.concat(station),
+      stationFilter: ""
+    }));
+  }
+
   render() {
     return (
       <div>
         <h3>Set local station(s)</h3>
         <UserStationList stations={this.state.userTubeStations} />
-        <form onSubmit={this.handleSubmit}>
-          <label htmlFor="new-station">
-            Station name:
+        <form>
+          <label htmlFor="station-filter">
+            Name:
           </label>
           <input
-            id="new-station"
+            id="station-filter"
             onChange={this.handleChange}
             value={this.state.stationFilter}
           />
-          <button>
-            Add station
-          </button>
         </form>
-        <FilteredStationList stations={this.state.filteredTubeStations} />
+        <FilteredStationList
+          stations={this.state.filteredTubeStations}
+          onClick={this.addUserStation}
+        />
       </div>
     );
   }
@@ -102,7 +100,10 @@ class FilteredStationList extends Component {
     return (
       <ul>
         {this.props.stations.map(station => (
-          <li key={station.id}>{station.name}</li>
+          <div key={station.id}>
+            <li key={station.id}>{station.name}</li>
+            <button onClick={() => this.props.onClick(station)}>Add</button>
+          </div>
         ))}
       </ul>
     );
@@ -110,29 +111,6 @@ class FilteredStationList extends Component {
 }
 
 export default App;
-
-// TODO: This becomes code to store our list of set stations.
-// function getLocalStationsFromCookies() {
-//   if (cookies.get("tfl-arr")) {
-//     console.log("Hey, there's a cookie!");
-//     return JSON.parse(cookies.get("tfl-arr"));
-//   } else {
-//     console.log("No cookie set, getting stations manually.");
-//     getTubeLines()
-//       .then(tubeLines => getTubeStations(tubeLines))
-//       .then(tubeStations => {
-//         console.log("Tube stations from API: " + tubeStations.length);
-//         cookies.set("tfl-arr", JSON.stringify(tubeStations),
-//           {
-//             path: "/",
-//             maxAge: 31536000
-//           }
-//         );
-//         return tubeStations;
-//       })
-//       .catch(err => console.log(err));
-//   }
-// }
 
 function getTubeLines() {
   return new Promise(
