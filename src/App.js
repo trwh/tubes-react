@@ -135,7 +135,7 @@ class ArrivalsBoardLine extends Component {
      <ul>
         {this.props.arrivals.map(arrival => (
           <div key={arrival.id}>
-            <li key={arrival.id}>{arrival.timeToStation / 60}mins To: {arrival.towards} ({arrival.currentLocation})</li>
+            <li key={arrival.id}>{arrival.humanReadableTimeToStation} To: {arrival.towards} ({arrival.currentLocation})</li>
           </div>
         ))}
       </ul>

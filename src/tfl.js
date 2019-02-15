@@ -89,6 +89,7 @@ export function getArrivals(stationId) {
     function(resolve, reject) {
 
       let arrivals = [];
+      let lines = [];
       let arrivalsIdsSeen = [];
 
       fetch("https://api.tfl.gov.uk/stoppoint/" + stationId + "/arrivals")
@@ -108,8 +109,10 @@ export function getArrivals(stationId) {
               arrivals.push(simplifyArrival(arrival));
             }
           })
-          arrivals = groupArrivalsByLines(arrivals);
-          resolve(arrivals);
+          arrivals = addHumanReadableTime(arrivals);
+          lines = groupArrivalsByLines(arrivals);
+          lines = arrangeLineArrivalsByTime(lines);
+          resolve(lines);
         })
         .catch(err => reject(err));
 
@@ -141,8 +144,8 @@ function groupArrivalsByLines (arrivals) {
       linesWithArrivals.push(getLineFromArrival(arrival));
     }
 
-    let linesWithArrivalsIndex = lineIdsSeen.indexOf(arrival.lineId);
-    linesWithArrivals[linesWithArrivalsIndex].arrivals.push(arrival);
+    let lineIndex = lineIdsSeen.indexOf(arrival.lineId);
+    linesWithArrivals[lineIndex].arrivals.push(arrival);
   })
 
   return(linesWithArrivals);
@@ -154,6 +157,45 @@ function getLineFromArrival (arrival) {
     name: arrival.lineName,
     arrivals: []
   }
+}
+
+function arrangeArrivalsByTime (arrivals) {
+  let timesToStationSeen = [];
+  let orderedArrivals = [];
+
+  arrivals.forEach(arrival => {
+    timesToStationSeen.push(arrival.timeToStation);
+  })
+
+  timesToStationSeen = timesToStationSeen.sort((a, b) => a - b);
+
+  arrivals.forEach(arrival => {
+    let arrivalIndex = timesToStationSeen.indexOf(arrival.timeToStation);
+    orderedArrivals[arrivalIndex] = arrival;
+  })
+
+  return(orderedArrivals);
+}
+
+function arrangeLineArrivalsByTime (lines) {
+  for (let i = 0; i < lines.length; i++) {
+    lines[i].arrivals = arrangeArrivalsByTime(lines[i].arrivals);
+  }
+
+  return(lines);
+}
+
+function addHumanReadableTime (arrivals) {
+  arrivals.forEach(arrival => {
+    arrival.humanReadableTimeToStation =
+      secondsToHumanReadableTime(arrival.timeToStation);
+  })
+
+  return(arrivals);
+}
+
+function secondsToHumanReadableTime (s) {
+  return s.toString();
 }
 
 export function updateArrivalsOnStations(stations) {
