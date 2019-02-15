@@ -14,7 +14,7 @@ class App extends Component {
     //   .then(stations => console.log("Tube stations from API: " + JSON.stringify(stations)))
     //   .catch(err => console.log(err));
 
-    // getArrivals([{"id":"940GZZLURMD","name":"Richmond"}])
+    // updateArrivalsOnStations([{"id":"940GZZLURMD","name":"Richmond"}])
     //   .then(arrivals => console.log("Arrivals information from API: " + JSON.stringify(arrivals)))
     //   .catch(err => console.log(err));
 
@@ -25,7 +25,7 @@ class App extends Component {
       filterValue: ""
     };
 
-    // this.doGetArrivals = this.doGetArrivals.bind(this);
+    // this.doUpdateArrivalsOnStations = this.doUpdateArrivalsOnStations.bind(this);
     this.filterChange = this.filterChange.bind(this);
     this.addUserStation = this.addUserStation.bind(this);
     this.clearUserStations = this.clearUserStations.bind(this);
@@ -33,7 +33,7 @@ class App extends Component {
   }
 
   componentDidMount() {
-    this.doGetArrivals();
+    this.doUpdateArrivalsOnStations();
 
     setTimeout(() => {
       console.log("Wrueey");
@@ -41,8 +41,8 @@ class App extends Component {
     }, 5000);
   }
 
-  doGetArrivals() {
-    getArrivals(this.state.userStations)
+  doUpdateArrivalsOnStations() {
+    updateArrivalsOnStations(this.state.userStations)
       .then(updatedUserStations => {
         this.setState({ userStations: updatedUserStations });
       })
@@ -68,7 +68,7 @@ class App extends Component {
       this.setState(state => ({
         userStations: state.userStations.concat(station),
       }));
-    // this.doGetArrivals();
+    // this.doUpdateArrivalsOnStations();
     }
   }
 
@@ -207,14 +207,8 @@ function getStations(lines) {
           jsonResponses.forEach(json => {
             Array.from(json).forEach(station => {
               if (!stationIdsSeen.includes(station.id)) {
-                let cleanedName = station.commonName.replace(
-                  " Underground Station", "");
-                let simplifiedStation = {
-                  id: station.id,
-                  name: cleanedName
-                };
                 stationIdsSeen.push(station.id);
-                stations.push(simplifiedStation);
+                stations.push(simplifyStation(station));
               }
             })
           })
@@ -227,6 +221,15 @@ function getStations(lines) {
 
     }
   )
+}
+
+function simplifyStation (station) {
+  let cleanedName = station.commonName.replace(
+    " Underground Station", "");
+  return {
+    id: station.id,
+    name: cleanedName
+  };
 }
 
 function getArrival(stationId) {
@@ -260,7 +263,21 @@ function getArrival(stationId) {
   )
 }
 
-function getArrivals(stations) {
+function simplifyArrival (arrival) {
+  let regex = / Platform \d$/gmi;
+  let cleanedCurrentLocation = arrival.currentLocation.replace(
+    regex, "");
+  return {
+    id: arrival.id,
+    lineId: arrival.lineId,
+    lineName: arrival.lineName,
+    towards: arrival.towards,
+    timeToStation: arrival.timeToStation,
+    currentLocation: cleanedCurrentLocation
+  };
+}
+
+function updateArrivalsOnStations(stations) {
   return new Promise(
     function(resolve, reject) {
 
@@ -305,18 +322,4 @@ function getArrivals(stations) {
 
     }
   )
-}
-
-function simplifyArrival (arrival) {
-  let regex = / Platform \d$/gmi;
-  let cleanedCurrentLocation = arrival.currentLocation.replace(
-    regex, "");
-  return {
-    id: arrival.id,
-    lineId: arrival.lineId,
-    lineName: arrival.lineName,
-    towards: arrival.towards,
-    timeToStation: arrival.timeToStation,
-    currentLocation: cleanedCurrentLocation
-  };
 }
