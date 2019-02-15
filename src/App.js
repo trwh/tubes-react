@@ -36,7 +36,7 @@ class App extends Component {
     setTimeout(() => {
       // console.log("Refreshing arrivals information.");
       this.periodicallyRefresh();
-    }, 5000);
+    }, 30000);
 
     this.updateUserStationsAndTheirLineArrivals(this.state.userStations);
   }
@@ -99,7 +99,7 @@ class App extends Component {
   render() {
     return (
       <div>
-        <h2>Live Tube Arrivals</h2>
+        <h2>Live TFL Arrivals</h2>
         <div>
           <UserStationList stations={this.state.userStations} />
           <div>
