@@ -29,15 +29,17 @@ class App extends Component {
   }
 
   componentDidMount() {
-    this.doUpdateLineArrivalsOnStations(this.state.userStations);
+    this.getUserStationsFromCookie();
 
-    setTimeout(() => {
-      console.log("Wrueey");
-      this.componentDidMount();
-    }, 5000);
+    // this.updateUserStationsAndTheirLineArrivals(this.state.userStations);
+
+    // setTimeout(() => {
+    //   console.log("Wrueey");
+    //   this.componentDidMount();
+    // }, 5000);
   }
 
-  doUpdateLineArrivalsOnStations(stations) {
+  updateUserStationsAndTheirLineArrivals(stations) {
     tfl.updateLineArrivalsOnStations(stations)
       .then(updatedStations => {
         this.setState({ userStations: updatedStations });
@@ -62,16 +64,34 @@ class App extends Component {
   addUserStation(station) {
     if (!this.state.userStations.includes(station)) {
       let newUserStations = this.state.userStations.concat(station);
-      this.doUpdateLineArrivalsOnStations(newUserStations);
+      this.setStationCookie(newUserStations);
+      this.updateUserStationsAndTheirLineArrivals(newUserStations);
     }
   }
 
   clearUserStations() {
+    this.setStationCookie([]);
     this.setState({ userStations: [] });
   }
 
   clearFilterValue() {
     this.setState({ filterValue: "" });
+  }
+
+  setStationCookie(stations) {
+    let stationsWithoutLines = tfl.removeLinesFromStations(stations);
+    cookies.set("stations", stationsWithoutLines, {
+        path: "/",
+        maxAge: 99999999
+      }
+    );
+  }
+
+  getUserStationsFromCookie() {
+    if(cookies.get("stations")) {
+      let userStationsFromCookie = cookies.get("stations");
+      this.updateUserStationsAndTheirLineArrivals(userStationsFromCookie);
+    }
   }
 
   render() {

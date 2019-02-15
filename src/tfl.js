@@ -234,3 +234,16 @@ export function updateLineArrivalsOnStations(stations) {
     }
   )
 }
+
+export function removeLinesFromStations(stations) {
+  let stationsWithoutLines = [];
+
+  stations.forEach(station => {
+    stationsWithoutLines.push ({
+      id: station.id,
+      name: station.name
+    });
+  });
+
+  return(stationsWithoutLines);
+}
