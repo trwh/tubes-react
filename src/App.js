@@ -33,7 +33,7 @@ class App extends Component {
   }
 
   componentDidMount() {
-    this.doUpdateArrivalsOnStations();
+    this.doUpdateArrivalsOnStations(this.state.userStations);
 
     setTimeout(() => {
       console.log("Wrueey");
@@ -41,10 +41,10 @@ class App extends Component {
     }, 5000);
   }
 
-  doUpdateArrivalsOnStations() {
-    updateArrivalsOnStations(this.state.userStations)
-      .then(updatedUserStations => {
-        this.setState({ userStations: updatedUserStations });
+  doUpdateArrivalsOnStations(stations) {
+    updateArrivalsOnStations(stations)
+      .then(updatedStations => {
+        this.setState({ userStations: updatedStations });
       })
       .catch(err => console.log(err));
   }
@@ -66,12 +66,7 @@ class App extends Component {
   addUserStation(station) {
     if (!this.state.userStations.includes(station)) {
       let newUserStations = this.state.userStations.concat(station);
-
-      updateArrivalsOnStations(newUserStations)
-        .then(updatedNewUserStations => {
-          this.setState({ userStations: updatedNewUserStations });
-        })
-        .catch(err => console.log(err));
+      this.doUpdateArrivalsOnStations(newUserStations);
     }
   }
 
@@ -278,6 +273,31 @@ function simplifyArrival (arrival) {
   };
 }
 
+function groupArrivalsByLines (arrivals) {
+  let lineIdsSeen = [];
+  let linesWithArrivals = [];
+
+  arrivals.forEach(arrival => {
+    if (!lineIdsSeen.includes(arrival.lineId)) {
+      lineIdsSeen.push(arrival.lineId);
+      linesWithArrivals.push(getLineFromArrival(arrival));
+    }
+
+    let linesWithArrivalsIndex = lineIdsSeen.indexOf(arrival.lineId);
+    linesWithArrivals[linesWithArrivalsIndex].arrivals.push(arrival);
+  })
+
+  return(linesWithArrivals);
+}
+
+function getLineFromArrival (arrival) {
+  return {
+    id: arrival.lineId,
+    name: arrival.lineName,
+    arrivals: []
+  }
+}
+
 function updateArrivalsOnStations(stations) {
   return new Promise(
     function(resolve, reject) {
@@ -312,7 +332,7 @@ function updateArrivalsOnStations(stations) {
               }
             })
 
-            stations[i].arrivals = arrivals;
+            stations[i].arrivals = groupArrivalsByLines(arrivals);
           }
 
           resolve(stations);
