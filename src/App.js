@@ -228,7 +228,7 @@ function simplifyStation (station) {
   };
 }
 
-function getArrival(stationId) {
+function getArrivals(stationId) {
   return new Promise(
     function(resolve, reject) {
 
@@ -240,7 +240,8 @@ function getArrival(stationId) {
           if(response.ok) {
             return response.json();
           } else {
-            throw new Error("Error getting arrivals from TFL API.")
+            throw new Error("Error getting arrivals for "
+              + stationId + " from TFL API.");
           }
         })
         .then(json => {
@@ -251,6 +252,7 @@ function getArrival(stationId) {
               arrivals.push(simplifyArrival(arrival));
             }
           })
+          arrivals = groupArrivalsByLines(arrivals);
           resolve(arrivals);
         })
         .catch(err => reject(err));
@@ -302,37 +304,20 @@ function updateArrivalsOnStations(stations) {
   return new Promise(
     function(resolve, reject) {
 
-      let arrivalsFetchPromises = [];
+      let arrivalsPromises = [];
 
       stations.forEach(station => {
-        arrivalsFetchPromises.push(
-          fetch("https://api.tfl.gov.uk/stoppoint/" + station.id + "/arrivals")
-            .then(response => {
-              if(response.ok) {
-                return response.json();
-              } else {
-                throw new Error("Error getting arrivals from TFL API.")
-              }
-            })
+        arrivalsPromises.push(
+          getArrivals(station.id)
+            .then(arrival => { return arrival })
         );
       })
 
-      Promise.all(arrivalsFetchPromises)
-        .then(jsonResponses => {
+      Promise.all(arrivalsPromises)
+        .then(stationArrivals => {
 
-          for (let i = 0; i < jsonResponses.length; i++) {
-            let arrivals = [];
-            let arrivalsIdsSeen = [];
-
-            jsonResponses[i].forEach(arrival => {
-              if (!arrivalsIdsSeen.includes(arrival.id) &&
-                arrival.modeName === "tube") {
-                arrivalsIdsSeen.push(arrival.id);
-                arrivals.push(simplifyArrival(arrival));
-              }
-            })
-
-            stations[i].arrivals = groupArrivalsByLines(arrivals);
+          for (let i = 0; i < stationArrivals.length; i++) {
+            stations[i].arrivals = stationArrivals[i];
           }
 
           resolve(stations);
