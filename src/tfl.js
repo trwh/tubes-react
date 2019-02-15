@@ -195,8 +195,16 @@ function addHumanReadableTimes(arrivals) {
   return(arrivals);
 }
 
-function secondsToHumanReadableTime(s) {
-  return s.toString();
+function secondsToHumanReadableTime(seconds) {
+  if (seconds < 60) {
+    return (seconds.toString() + "\"");
+  }
+
+  let minutes = Math.floor(seconds / 60);
+  seconds = seconds % 60;
+
+  return (minutes.toString() + "'" +
+    seconds.toString() + "\"");
 }
 
 export function updateLineArrivalsOnStations(stations) {
