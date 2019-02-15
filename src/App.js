@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import Cookies from 'universal-cookie';
 // import './App.css';
 
-const tubeStations = require("./stations.json");
+const masterStations = require("./stations.json");
 const cookies = new Cookies();
 
 class App extends Component {
@@ -10,8 +10,8 @@ class App extends Component {
     super(props);
 
     // getTubeLines()
-    //   .then(tubeLines => getTubeStations(tubeLines))
-    //   .then(tubeStations => console.log("Tube stations from API: " + JSON.stringify(tubeStations)))
+    //   .then(tubeLines => getMasterStations(tubeLines))
+    //   .then(masterStations => console.log("Tube stations from API: " + JSON.stringify(masterStations)))
     //   .catch(err => console.log(err));
 
     // getArrivals([{"id":"940GZZLURMD","name":"Richmond"}])
@@ -19,9 +19,9 @@ class App extends Component {
     //   .catch(err => console.log(err));
 
     this.state = {
-      tubeStations,
-      filteredTubeStations: tubeStations,
-      userTubeStations: [],
+      masterStations,
+      filteredStations: masterStations,
+      userStations: [],
       filterValue: ""
     };
 
@@ -42,9 +42,9 @@ class App extends Component {
   }
 
   doGetArrivals() {
-    getArrivals(this.state.userTubeStations)
-      .then(updatedUserTubeStations => {
-        this.setState({ userTubeStations: updatedUserTubeStations });
+    getArrivals(this.state.userStations)
+      .then(updatedUserStations => {
+        this.setState({ userStations: updatedUserStations });
       })
       .catch(err => console.log(err));
   }
@@ -55,25 +55,25 @@ class App extends Component {
   }
 
   filterStations(e) {
-    let filteredStations = this.state.tubeStations;
+    let filteredStations = this.state.masterStations;
     filteredStations = filteredStations.filter((station) => {
       return station.name.toLowerCase().search(
         e.target.value.toLowerCase()) !== -1;
     });
-    this.setState({ filteredTubeStations: filteredStations });
+    this.setState({ filteredStations: filteredStations });
   }
 
   addUserStation(station) {
-    if (!this.state.userTubeStations.includes(station)) {
+    if (!this.state.userStations.includes(station)) {
       this.setState(state => ({
-        userTubeStations: state.userTubeStations.concat(station),
+        userStations: state.userStations.concat(station),
       }));
     // this.doGetArrivals();
     }
   }
 
   clearUserStations() {
-    this.setState({ userTubeStations: [] });
+    this.setState({ userStations: [] });
   }
 
   clearFilterValue() {
@@ -83,7 +83,7 @@ class App extends Component {
   render() {
     return (
       <div>
-        <UserStationList stations={this.state.userTubeStations} />
+        <UserStationList stations={this.state.userStations} />
         <button onClick={() => this.clearUserStations()}>Clear list</button>
         <form>
           <label htmlFor="station-filter">
@@ -97,7 +97,7 @@ class App extends Component {
           />
         </form>
         <FilteredStationList
-          stations={this.state.filteredTubeStations}
+          stations={this.state.filteredStations}
           onClick={this.addUserStation}
         />
       </div>
@@ -177,11 +177,11 @@ function getTubeLines() {
   )
 }
 
-function getTubeStations(tubeLines) {
+function getMasterStations(tubeLines) {
   return new Promise(
     function(resolve, reject) {
 
-      var tubeStations = [];
+      var masterStations = [];
       var tubeStationFetchPromises = [];
       var tubeStationIdsSeen = [];
 
@@ -211,14 +211,14 @@ function getTubeStations(tubeLines) {
                   name: cleanedName
                 };
                 tubeStationIdsSeen.push(station.id);
-                tubeStations.push(simplifiedStation);
+                masterStations.push(simplifiedStation);
               }
             })
           })
 
-          // console.log("OK, there were " + tubeStations.length
+          // console.log("OK, there were " + masterStations.length
           //   + " stations found.");
-          resolve(tubeStations);
+          resolve(masterStations);
 
         })
         .catch(err => reject(err)
