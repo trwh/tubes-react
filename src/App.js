@@ -65,10 +65,13 @@ class App extends Component {
 
   addUserStation(station) {
     if (!this.state.userStations.includes(station)) {
-      this.setState(state => ({
-        userStations: state.userStations.concat(station),
-      }));
-    // this.doUpdateArrivalsOnStations();
+      let newUserStations = this.state.userStations.concat(station);
+
+      updateArrivalsOnStations(newUserStations)
+        .then(updatedNewUserStations => {
+          this.setState({ userStations: updatedNewUserStations });
+        })
+        .catch(err => console.log(err));
     }
   }
 
@@ -214,10 +217,8 @@ function getStations(lines) {
           })
 
           resolve(stations);
-
         })
-        .catch(err => reject(err)
-        );
+        .catch(err => reject(err));
 
     }
   )
@@ -315,10 +316,8 @@ function updateArrivalsOnStations(stations) {
           }
 
           resolve(stations);
-
         })
-        .catch(err => reject(err)
-        );
+        .catch(err => reject(err));
 
     }
   )
