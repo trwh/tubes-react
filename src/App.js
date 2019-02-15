@@ -24,19 +24,21 @@ class App extends Component {
 
     this.filterChange = this.filterChange.bind(this);
     this.addUserStation = this.addUserStation.bind(this);
-    this.clearUserStations = this.clearUserStations.bind(this);
     this.clearFilterValue = this.clearFilterValue.bind(this);
   }
 
   componentDidMount() {
     this.getUserStationsFromCookie();
+    this.periodicallyRefresh();
+  }
 
-    // this.updateUserStationsAndTheirLineArrivals(this.state.userStations);
+  periodicallyRefresh() {
+    setTimeout(() => {
+      // console.log("Refreshing arrivals information.");
+      this.periodicallyRefresh();
+    }, 5000);
 
-    // setTimeout(() => {
-    //   console.log("Wrueey");
-    //   this.componentDidMount();
-    // }, 5000);
+    this.updateUserStationsAndTheirLineArrivals(this.state.userStations);
   }
 
   updateUserStationsAndTheirLineArrivals(stations) {
@@ -97,23 +99,28 @@ class App extends Component {
   render() {
     return (
       <div>
-        <UserStationList stations={this.state.userStations} />
-        <button onClick={() => this.clearUserStations()}>Clear list</button>
-        <form>
-          <label htmlFor="station-filter">
-            Name:
-          </label>
-          <input
-            id="station-filter"
-            onChange={this.filterChange}
-            onClick={this.clearFilterValue}
-            value={this.state.filterValue}
+        <h2>Live Tube Arrivals</h2>
+        <div>
+          <UserStationList stations={this.state.userStations} />
+          <div>
+            <button onClick={() => this.clearUserStations()}>Clear list</button>
+          </div>
+          <form>
+            <label htmlFor="station-filter">
+              Search:
+            </label>
+            <input
+              id="station-filter"
+              onChange={this.filterChange}
+              onClick={this.clearFilterValue}
+              value={this.state.filterValue}
+            />
+          </form>
+          <FilteredStationList
+            stations={this.state.filteredStations}
+            onClick={this.addUserStation}
           />
-        </form>
-        <FilteredStationList
-          stations={this.state.filteredStations}
-          onClick={this.addUserStation}
-        />
+        </div>
       </div>
     );
   }
@@ -122,14 +129,14 @@ class App extends Component {
 class UserStationList extends Component {
   render() {
     return (
-      <ul>
+      <div>
         {this.props.stations.map(station => (
           <div key={station.id}>
-            <li key={station.id}>{station.name}</li>
+            <h3>{station.name}</h3>
             <ArrivalsBoard lines={station.lines} />
           </div>
         ))}
-      </ul>
+      </div>
     );
   }
 }
@@ -137,14 +144,14 @@ class UserStationList extends Component {
 class ArrivalsBoard extends Component {
   render() {
     return (
-     <ul>
+     <div>
         {this.props.lines.map(line => (
           <div key={line.id}>
-            <li key={line.id}>{line.name}</li>
+            <h4>{line.name}</h4>
             <ArrivalsBoardLine arrivals={line.arrivals} />
           </div>
         ))}
-      </ul>
+      </div>
     );
   }
 }
@@ -154,9 +161,7 @@ class ArrivalsBoardLine extends Component {
     return (
      <ul>
         {this.props.arrivals.map(arrival => (
-          <div key={arrival.id}>
-            <li key={arrival.id}>{arrival.humanReadableTimeToStation} To: {arrival.towards} ({arrival.currentLocation})</li>
-          </div>
+          <li key={arrival.id}>{arrival.humanReadableTimeToStation} | {arrival.towards} | {arrival.currentLocation}</li>
         ))}
       </ul>
     );
