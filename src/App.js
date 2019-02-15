@@ -106,7 +106,36 @@ class UserStationList extends Component {
         {this.props.stations.map(station => (
           <div key={station.id}>
             <li key={station.id}>{station.name}</li>
-            <ArrivalsBoard arrivals={station.arrivals} />
+            <ArrivalsBoard lines={station.lines} />
+          </div>
+        ))}
+      </ul>
+    );
+  }
+}
+
+class ArrivalsBoard extends Component {
+  render() {
+    return (
+     <ul>
+        {this.props.lines.map(line => (
+          <div key={line.id}>
+            <li key={line.id}>{line.name}</li>
+            <ArrivalsBoardLine arrivals={line.arrivals} />
+          </div>
+        ))}
+      </ul>
+    );
+  }
+}
+
+class ArrivalsBoardLine extends Component {
+  render() {
+    return (
+     <ul>
+        {this.props.arrivals.map(arrival => (
+          <div key={arrival.id}>
+            <li key={arrival.id}>{arrival.timeToStation / 60}mins To: {arrival.towards} ({arrival.currentLocation})</li>
           </div>
         ))}
       </ul>
@@ -125,16 +154,6 @@ class FilteredStationList extends Component {
           </div>
         ))}
       </ul>
-    );
-  }
-}
-
-class ArrivalsBoard extends Component {
-  render() {
-    return (
-      <div>
-      {JSON.stringify(this.props.arrivals)}
-      </div>
     );
   }
 }

@@ -1,3 +1,6 @@
+// By Tim Harrison
+// https://github.com/trwh
+
 export function getLines() {
   return new Promise(
     function(resolve, reject) {
@@ -170,7 +173,7 @@ export function updateArrivalsOnStations(stations) {
         .then(stationArrivals => {
 
           for (let i = 0; i < stationArrivals.length; i++) {
-            stations[i].arrivals = stationArrivals[i];
+            stations[i].lines = stationArrivals[i];
           }
 
           resolve(stations);
