@@ -29,7 +29,7 @@ class App extends Component {
   }
 
   componentDidMount() {
-    this.doUpdateArrivalsOnStations(this.state.userStations);
+    this.doUpdateLineArrivalsOnStations(this.state.userStations);
 
     setTimeout(() => {
       console.log("Wrueey");
@@ -37,8 +37,8 @@ class App extends Component {
     }, 5000);
   }
 
-  doUpdateArrivalsOnStations(stations) {
-    tfl.updateArrivalsOnStations(stations)
+  doUpdateLineArrivalsOnStations(stations) {
+    tfl.updateLineArrivalsOnStations(stations)
       .then(updatedStations => {
         this.setState({ userStations: updatedStations });
       })
@@ -62,7 +62,7 @@ class App extends Component {
   addUserStation(station) {
     if (!this.state.userStations.includes(station)) {
       let newUserStations = this.state.userStations.concat(station);
-      this.doUpdateArrivalsOnStations(newUserStations);
+      this.doUpdateLineArrivalsOnStations(newUserStations);
     }
   }
 
