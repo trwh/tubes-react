@@ -1,68 +1,44 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+NB: This project is a work in progress - the UI is currently unstyled! Check back for updates, or star this repo to be notified automatically.
 
-## Available Scripts
+# [TFL Arrivals](https://tubes.org.uk)
+A simple React app which displays London tube arrival times provided by [Transport for London's public API](https://api.tfl.gov.uk/).
 
-In the project directory, you can run:
+Because it's not straightforward to get a list of tube stations from the TFL API, a list of stations and their IDs is provided in `/src/stations.json` and is included in the build. Live arrival times are then fetched by the app from the TFL API using these station IDs and refreshed every 30s. The TFL API doesn't require authentication.
 
-### `npm start`
+### Built With
 
-Runs the app in the development mode.<br>
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+* [Create React App](https://github.com/facebook/create-react-app)
+* [universal-cookie](https://github.com/reactivestack/cookies/tree/master/packages/universal-cookie)
 
-The page will reload if you make edits.<br>
-You will also see any lint errors in the console.
+### Installation
 
-### `npm test`
+```
+npm install
+npm start
+```
+Visit http://localhost:3000 to view TFL Arrivals!
 
-Launches the test runner in the interactive watch mode.<br>
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### Deploy to production
 
-### `npm run build`
+```
+npm run build
+```
 
-Builds the app for production to the `build` folder.<br>
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### Station List
 
-The build is minified and the filenames include the hashes.<br>
-Your app is ready to be deployed!
+The app relies on a prepopulated list of tube stations in `/src/stations.json` to display for the user to select. There are currently 270 and should any more be added, or any of their IDs change, you can recreate `stations.json` by following these instructions.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+The file is created with output from the functions I've written and `export`ed in `/src/tfl.js`. The relevant functions will be run in the right order if you uncomment this block in the main React `App` `constructor`,
 
-### `npm run eject`
+```
+    tfl.getLines()
+      .then(lines => tfl.getStations(lines))
+      .then(stations => console.log("Tube stations from API: " + JSON.stringify(stations)))
+      .catch(err => console.log(err));
+```
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+Then copy the output in the JavaScript console to create `/src/stations.json` manually.
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## License
 
-Instead, it will copy all the configuration files and the transitive dependencies (Webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/code-splitting
-
-### Analyzing the Bundle Size
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size
-
-### Making a Progressive Web App
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app
-
-### Advanced Configuration
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/advanced-configuration
-
-### Deployment
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/deployment
-
-### `npm run build` fails to minify
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
+This project is licensed under the terms of the GNU GPLv3 license.
