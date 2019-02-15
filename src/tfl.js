@@ -7,6 +7,8 @@ export function getLines() {
 
       let lines = [];
 
+      // Note that `dlr` and `overground` modes are also available, but the
+      // quality of the TFL API data is poor compared to tube.
       fetch("https://api.tfl.gov.uk/line/mode/tube")
         .then(response => {
           if(response.ok) {
@@ -27,7 +29,7 @@ export function getLines() {
   )
 }
 
-function simplifyLine (line) {
+function simplifyLine(line) {
   return {
     id: line.id,
     name: line.name
@@ -49,7 +51,7 @@ export function getStations(lines) {
               if(response.ok) {
                 return response.json();
               } else {
-                throw new Error("Error getting list of tube stations from TFL API.")
+                throw new Error("Error getting list of stations from TFL API.")
               }
             })
         );
@@ -75,7 +77,7 @@ export function getStations(lines) {
   )
 }
 
-function simplifyStation (station) {
+function simplifyStation(station) {
   let cleanedName = station.commonName.replace(
     " Underground Station", "");
   return {
@@ -84,7 +86,7 @@ function simplifyStation (station) {
   };
 }
 
-export function getArrivals(stationId) {
+export function getLineArrivals(stationId) {
   return new Promise(
     function(resolve, reject) {
 
@@ -103,13 +105,12 @@ export function getArrivals(stationId) {
         })
         .then(json => {
           json.forEach(arrival => {
-            if (!arrivalsIdsSeen.includes(arrival.id) &&
-              arrival.modeName === "tube") {
+            if (!arrivalsIdsSeen.includes(arrival.id)) {
               arrivalsIdsSeen.push(arrival.id);
               arrivals.push(simplifyArrival(arrival));
             }
           })
-          arrivals = addHumanReadableTime(arrivals);
+          arrivals = addHumanReadableTimes(arrivals);
           lines = groupArrivalsByLines(arrivals);
           lines = arrangeLineArrivalsByTime(lines);
           resolve(lines);
@@ -120,7 +121,7 @@ export function getArrivals(stationId) {
   )
 }
 
-function simplifyArrival (arrival) {
+function simplifyArrival(arrival) {
   let regex = / Platform \d$/gmi;
   let cleanedCurrentLocation = arrival.currentLocation.replace(
     regex, "");
@@ -134,24 +135,24 @@ function simplifyArrival (arrival) {
   };
 }
 
-function groupArrivalsByLines (arrivals) {
+function groupArrivalsByLines(arrivals) {
   let lineIdsSeen = [];
-  let linesWithArrivals = [];
+  let lines = [];
 
   arrivals.forEach(arrival => {
     if (!lineIdsSeen.includes(arrival.lineId)) {
       lineIdsSeen.push(arrival.lineId);
-      linesWithArrivals.push(getLineFromArrival(arrival));
+      lines.push(getLineFromArrival(arrival));
     }
 
     let lineIndex = lineIdsSeen.indexOf(arrival.lineId);
-    linesWithArrivals[lineIndex].arrivals.push(arrival);
+    lines[lineIndex].arrivals.push(arrival);
   })
 
-  return(linesWithArrivals);
+  return(lines);
 }
 
-function getLineFromArrival (arrival) {
+function getLineFromArrival(arrival) {
   return {
     id: arrival.lineId,
     name: arrival.lineName,
@@ -159,7 +160,7 @@ function getLineFromArrival (arrival) {
   }
 }
 
-function arrangeArrivalsByTime (arrivals) {
+function arrangeArrivalsByTime(arrivals) {
   let timesToStationSeen = [];
   let orderedArrivals = [];
 
@@ -177,7 +178,7 @@ function arrangeArrivalsByTime (arrivals) {
   return(orderedArrivals);
 }
 
-function arrangeLineArrivalsByTime (lines) {
+function arrangeLineArrivalsByTime(lines) {
   for (let i = 0; i < lines.length; i++) {
     lines[i].arrivals = arrangeArrivalsByTime(lines[i].arrivals);
   }
@@ -185,7 +186,7 @@ function arrangeLineArrivalsByTime (lines) {
   return(lines);
 }
 
-function addHumanReadableTime (arrivals) {
+function addHumanReadableTimes(arrivals) {
   arrivals.forEach(arrival => {
     arrival.humanReadableTimeToStation =
       secondsToHumanReadableTime(arrival.timeToStation);
@@ -194,28 +195,28 @@ function addHumanReadableTime (arrivals) {
   return(arrivals);
 }
 
-function secondsToHumanReadableTime (s) {
+function secondsToHumanReadableTime(s) {
   return s.toString();
 }
 
-export function updateArrivalsOnStations(stations) {
+export function updateLineArrivalsOnStations(stations) {
   return new Promise(
     function(resolve, reject) {
 
-      let arrivalsPromises = [];
+      let lineArrivalsPromises = [];
 
       stations.forEach(station => {
-        arrivalsPromises.push(
-          getArrivals(station.id)
-            .then(arrival => { return arrival })
+        lineArrivalsPromises.push(
+          getLineArrivals(station.id)
+            .then(lineArrivals => { return lineArrivals })
         );
       })
 
-      Promise.all(arrivalsPromises)
-        .then(stationArrivals => {
+      Promise.all(lineArrivalsPromises)
+        .then(stationLineArrivals => {
 
-          for (let i = 0; i < stationArrivals.length; i++) {
-            stations[i].lines = stationArrivals[i];
+          for (let i = 0; i < stationLineArrivals.length; i++) {
+            stations[i].lines = stationLineArrivals[i];
           }
 
           resolve(stations);
