@@ -9,9 +9,9 @@ class App extends Component {
   constructor(props) {
     super(props);
 
-    // getTubeLines()
-    //   .then(tubeLines => getMasterStations(tubeLines))
-    //   .then(masterStations => console.log("Tube stations from API: " + JSON.stringify(masterStations)))
+    // getLines()
+    //   .then(lines => getStations(lines))
+    //   .then(stations => console.log("Tube stations from API: " + JSON.stringify(stations)))
     //   .catch(err => console.log(err));
 
     // getArrivals([{"id":"940GZZLURMD","name":"Richmond"}])
@@ -147,11 +147,11 @@ class ArrivalsBoard extends Component {
 
 export default App;
 
-function getTubeLines() {
+function getLines() {
   return new Promise(
     function(resolve, reject) {
 
-      var tubeLines = [];
+      let lines = [];
 
       fetch("https://api.tfl.gov.uk/line/mode/tube")
         .then(response => {
@@ -163,13 +163,9 @@ function getTubeLines() {
         })
         .then(json => {
           json.forEach(line => {
-            var simplifiedLine = {
-              id: line.id,
-              name: line.name
-            };
-            tubeLines.push(simplifiedLine);
+            lines.push(simplifyLine(line));
           })
-          resolve(tubeLines);
+          resolve(lines);
         })
         .catch(err => reject(err));
 
@@ -177,16 +173,23 @@ function getTubeLines() {
   )
 }
 
-function getMasterStations(tubeLines) {
+function simplifyLine (line) {
+  return {
+    id: line.id,
+    name: line.name
+  };
+}
+
+function getStations(lines) {
   return new Promise(
     function(resolve, reject) {
 
-      var masterStations = [];
-      var tubeStationFetchPromises = [];
-      var tubeStationIdsSeen = [];
+      let stations = [];
+      let stationFetchPromises = [];
+      let stationIdsSeen = [];
 
-      tubeLines.forEach(line => {
-        tubeStationFetchPromises.push(
+      lines.forEach(line => {
+        stationFetchPromises.push(
           fetch("https://api.tfl.gov.uk/line/" + line.id + "/stoppoints")
             .then(response => {
               if(response.ok) {
@@ -198,27 +201,25 @@ function getMasterStations(tubeLines) {
         );
       })
 
-      Promise.all(tubeStationFetchPromises)
+      Promise.all(stationFetchPromises)
         .then(jsonResponses => {
 
           jsonResponses.forEach(json => {
             Array.from(json).forEach(station => {
-              if (!tubeStationIdsSeen.includes(station.id)) {
-                var cleanedName = station.commonName.replace(
+              if (!stationIdsSeen.includes(station.id)) {
+                let cleanedName = station.commonName.replace(
                   " Underground Station", "");
-                var simplifiedStation = {
+                let simplifiedStation = {
                   id: station.id,
                   name: cleanedName
                 };
-                tubeStationIdsSeen.push(station.id);
-                masterStations.push(simplifiedStation);
+                stationIdsSeen.push(station.id);
+                stations.push(simplifiedStation);
               }
             })
           })
 
-          // console.log("OK, there were " + masterStations.length
-          //   + " stations found.");
-          resolve(masterStations);
+          resolve(stations);
 
         })
         .catch(err => reject(err)
@@ -232,8 +233,8 @@ function getArrival(stationId) {
   return new Promise(
     function(resolve, reject) {
 
-      var arrivals = [];
-      var arrivalsIdsSeen = [];
+      let arrivals = [];
+      let arrivalsIdsSeen = [];
 
       fetch("https://api.tfl.gov.uk/stoppoint/" + stationId + "/arrivals")
         .then(response => {
@@ -247,19 +248,8 @@ function getArrival(stationId) {
           json.forEach(arrival => {
             if (!arrivalsIdsSeen.includes(arrival.id) &&
               arrival.modeName === "tube") {
-              var regex = / Platform \d$/gmi;
-              var cleanedCurrentLocation = arrival.currentLocation.replace(
-                regex, "");
-              var simplifiedArrival = {
-                id: arrival.id,
-                lineId: arrival.lineId,
-                lineName: arrival.lineName,
-                towards: arrival.towards,
-                timeToStation: arrival.timeToStation,
-                currentLocation: cleanedCurrentLocation
-              };
               arrivalsIdsSeen.push(arrival.id);
-              arrivals.push(simplifiedArrival);
+              arrivals.push(simplifyArrival(arrival));
             }
           })
           resolve(arrivals);
@@ -274,8 +264,7 @@ function getArrivals(stations) {
   return new Promise(
     function(resolve, reject) {
 
-      var updatedStations = [];
-      var arrivalsFetchPromises = [];
+      let arrivalsFetchPromises = [];
 
       stations.forEach(station => {
         arrivalsFetchPromises.push(
@@ -293,37 +282,22 @@ function getArrivals(stations) {
       Promise.all(arrivalsFetchPromises)
         .then(jsonResponses => {
 
-          for (var i = 0; i < jsonResponses.length; i++) {
-
+          for (let i = 0; i < jsonResponses.length; i++) {
             let arrivals = [];
             let arrivalsIdsSeen = [];
 
             jsonResponses[i].forEach(arrival => {
               if (!arrivalsIdsSeen.includes(arrival.id) &&
                 arrival.modeName === "tube") {
-                var regex = / Platform \d$/gmi;
-                var cleanedCurrentLocation = arrival.currentLocation.replace(
-                  regex, "");
-                var simplifiedArrival = {
-                  id: arrival.id,
-                  lineId: arrival.lineId,
-                  lineName: arrival.lineName,
-                  towards: arrival.towards,
-                  timeToStation: arrival.timeToStation,
-                  currentLocation: cleanedCurrentLocation
-                };
                 arrivalsIdsSeen.push(arrival.id);
-                arrivals.push(simplifiedArrival);
+                arrivals.push(simplifyArrival(arrival));
               }
             })
 
-            var updatedStation = stations[i];
-            updatedStation.arrivals = arrivals;
-            updatedStations.push(updatedStation);
-
+            stations[i].arrivals = arrivals;
           }
 
-          resolve(updatedStations);
+          resolve(stations);
 
         })
         .catch(err => reject(err)
@@ -331,4 +305,18 @@ function getArrivals(stations) {
 
     }
   )
+}
+
+function simplifyArrival (arrival) {
+  let regex = / Platform \d$/gmi;
+  let cleanedCurrentLocation = arrival.currentLocation.replace(
+    regex, "");
+  return {
+    id: arrival.id,
+    lineId: arrival.lineId,
+    lineName: arrival.lineName,
+    towards: arrival.towards,
+    timeToStation: arrival.timeToStation,
+    currentLocation: cleanedCurrentLocation
+  };
 }
