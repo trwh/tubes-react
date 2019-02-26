@@ -171,14 +171,15 @@ class ArrivalsBoardLine extends Component {
 class FilteredStationList extends Component {
   render() {
     return (
-      <ul>
+      <div id="filtered-stations-dropdown">
         {this.props.stations.map(station => (
-          <div key={station.id}>
-            <li key={station.id}>{station.name}</li>
-            <button onClick={() => this.props.onClick(station)}>Add</button>
+          <div key={station.id}
+            class="filtered-stations-dropdown-item"
+            onClick={() => this.props.onClick(station)}>
+            {station.name}
           </div>
         ))}
-      </ul>
+      </div>
     );
   }
 }
