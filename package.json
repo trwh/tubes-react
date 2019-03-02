@@ -5,8 +5,7 @@
   "dependencies": {
     "react": "^16.8.1",
     "react-dom": "^16.8.1",
-    "react-scripts": "2.1.5",
-    "universal-cookie": "^3.0.7"
+    "react-scripts": "2.1.5"
   },
   "scripts": {
     "start": "react-scripts start",

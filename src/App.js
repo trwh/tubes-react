@@ -1,10 +1,8 @@
 import React, { Component } from 'react';
 import * as tfl from './tfl.js';
-import Cookies from 'universal-cookie';
 // import './App.css';
 
 const masterStations = require("./stations.json");
-const cookies = new Cookies();
 
 class App extends Component {
   constructor(props) {
@@ -28,17 +26,19 @@ class App extends Component {
   }
 
   componentDidMount() {
-    this.getUserStationsFromCookie();
-    this.periodicallyRefresh();
+    this.getUserStationsFromLocalStorage();
+
+    setTimeout(() => {
+      this.periodicallyRefresh();
+    }, 10);
   }
 
   periodicallyRefresh() {
+    this.updateUserStationsAndTheirLineArrivals(this.state.userStations);
+
     setTimeout(() => {
-      // console.log("Refreshing arrivals information.");
       this.periodicallyRefresh();
     }, 30000);
-
-    this.updateUserStationsAndTheirLineArrivals(this.state.userStations);
   }
 
   updateUserStationsAndTheirLineArrivals(stations) {
@@ -66,13 +66,13 @@ class App extends Component {
   addUserStation(station) {
     if (!this.state.userStations.includes(station)) {
       let newUserStations = this.state.userStations.concat(station);
-      this.setStationCookie(newUserStations);
+      this.setUserStationsInLocalStorage(newUserStations);
       this.setState({ userStations: newUserStations });
     }
   }
 
   clearUserStations() {
-    this.setStationCookie([]);
+    localStorage.removeItem("userStations");
     this.setState({ userStations: [] });
   }
 
@@ -80,19 +80,19 @@ class App extends Component {
     this.setState({ filterValue: "" });
   }
 
-  setStationCookie(stations) {
+  setUserStationsInLocalStorage(stations) {
     let stationsWithoutLineArrivals = tfl.resetLineArrivalsOnStations(stations);
-    cookies.set("stations", stationsWithoutLineArrivals, {
-        path: "/",
-        maxAge: 99999999
-      }
+    localStorage.setItem(
+      "userStations",
+      JSON.stringify(stationsWithoutLineArrivals)
     );
   }
 
-  getUserStationsFromCookie() {
-    if(cookies.get("stations")) {
-      let userStationsFromCookie = cookies.get("stations");
-      this.updateUserStationsAndTheirLineArrivals(userStationsFromCookie);
+  getUserStationsFromLocalStorage() {
+    if (localStorage.getItem("userStations")) {
+      this.setState({
+        userStations: JSON.parse(localStorage.getItem("userStations"))
+      });
     }
   }
 
