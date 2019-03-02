@@ -1,7 +1,7 @@
 // By Tim Harrison
 // https://github.com/trwh
 
-export function getLines() {
+export function getLinesFromTflApi() {
   return new Promise(
     function(resolve, reject) {
 
@@ -37,7 +37,7 @@ function simplifyLine(line) {
   };
 }
 
-export function getStationsWithLines(lines) {
+export function getStationsWithLinesFromTflApi(lines) {
   return new Promise(
     function(resolve, reject) {
 
