@@ -10,9 +10,9 @@ class App extends Component {
   constructor(props) {
     super(props);
 
-    // tfl.getLines()
-    //   .then(lines => tfl.getStationsWithLines(lines))
-    //   .then(stations => console.log("Tube stations from API: " + JSON.stringify(stations)))
+    // tfl.getLinesFromTflApi()
+    //   .then(lines => tfl.getStationsWithLinesFromTflApi(lines))
+    //   .then(stationsWithLines => console.log("Tube stations from API: " + JSON.stringify(stationsWithLines)))
     //   .catch(err => console.log(err));
 
     this.state = {
