@@ -34,14 +34,14 @@ class App extends Component {
   }
 
   periodicallyRefresh() {
-    this.updateUserStationsAndTheirLineArrivals();
+    this.updateUserStationLineArrivals();
 
     setTimeout(() => {
       this.periodicallyRefresh();
-    }, 10000);
+    }, 30000);
   }
 
-  updateUserStationsAndTheirLineArrivals() {
+  updateUserStationLineArrivals() {
     tfl.updateLineArrivalsOnStations(this.state.userStations)
       .then(updatedStations => {
         this.setState({ userStations: updatedStations });
@@ -69,7 +69,8 @@ class App extends Component {
       this.setUserStationsInLocalStorage(newUserStations);
 
       this.setState({ userStations: newUserStations }, () => {
-        this.updateUserStationsAndTheirLineArrivals();
+        this.clearFilterValue();
+        this.updateUserStationLineArrivals();
       });
     }
   }
@@ -80,7 +81,10 @@ class App extends Component {
   }
 
   clearFilterValue() {
-    this.setState({ filterValue: "" });
+    this.setState({
+      filterValue: "",
+      filteredStations: masterStations
+    });
   }
 
   setUserStationsInLocalStorage(stations) {
@@ -104,6 +108,9 @@ class App extends Component {
       <div>
         <h2>Live TFL Arrivals</h2>
         <div>
+          <div>
+            <button onClick={() => this.updateUserStationLineArrivals()}>Refresh</button>
+          </div>
           <UserStationList stations={this.state.userStations} />
           <div>
             <button onClick={() => this.clearUserStations()}>Clear list</button>
