@@ -11,7 +11,7 @@ class App extends Component {
     super(props);
 
     // tfl.getLines()
-    //   .then(lines => tfl.getStations(lines))
+    //   .then(lines => tfl.getStationsWithLines(lines))
     //   .then(stations => console.log("Tube stations from API: " + JSON.stringify(stations)))
     //   .catch(err => console.log(err));
 
