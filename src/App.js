@@ -58,7 +58,7 @@ class App extends Component {
     let filteredStations = this.state.masterStations;
     filteredStations = filteredStations.filter((station) => {
       return station.name.toLowerCase().search(
-        e.target.value.toLowerCase()) !== -1;
+        e.target.value.toLowerCase().trim()) !== -1;
     });
     this.setState({ filteredStations: filteredStations });
   }
