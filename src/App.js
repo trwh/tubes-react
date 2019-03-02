@@ -30,19 +30,19 @@ class App extends Component {
 
     setTimeout(() => {
       this.periodicallyRefresh();
-    }, 10);
+    }, 0);
   }
 
   periodicallyRefresh() {
-    this.updateUserStationsAndTheirLineArrivals(this.state.userStations);
+    this.updateUserStationsAndTheirLineArrivals();
 
     setTimeout(() => {
       this.periodicallyRefresh();
-    }, 30000);
+    }, 10000);
   }
 
-  updateUserStationsAndTheirLineArrivals(stations) {
-    tfl.updateLineArrivalsOnStations(stations)
+  updateUserStationsAndTheirLineArrivals() {
+    tfl.updateLineArrivalsOnStations(this.state.userStations)
       .then(updatedStations => {
         this.setState({ userStations: updatedStations });
       })
@@ -67,7 +67,10 @@ class App extends Component {
     if (!this.state.userStations.includes(station)) {
       let newUserStations = this.state.userStations.concat(station);
       this.setUserStationsInLocalStorage(newUserStations);
-      this.setState({ userStations: newUserStations });
+
+      this.setState({ userStations: newUserStations }, () => {
+        this.updateUserStationsAndTheirLineArrivals();
+      });
     }
   }
 
