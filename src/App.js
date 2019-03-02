@@ -67,7 +67,7 @@ class App extends Component {
     if (!this.state.userStations.includes(station)) {
       let newUserStations = this.state.userStations.concat(station);
       this.setStationCookie(newUserStations);
-      this.updateUserStationsAndTheirLineArrivals(newUserStations);
+      this.setState({ userStations: newUserStations });
     }
   }
 
@@ -174,7 +174,7 @@ class FilteredStationList extends Component {
       <div id="filtered-stations-dropdown">
         {this.props.stations.map(station => (
           <div key={station.id}
-            class="filtered-stations-dropdown-item"
+            className="filtered-stations-dropdown-item"
             onClick={() => this.props.onClick(station)}>
             {station.name}
           </div>
