@@ -37,11 +37,11 @@ function simplifyLine(line) {
   };
 }
 
-export function getStations(lines) {
+export function getStationsWithLines(lines) {
   return new Promise(
     function(resolve, reject) {
 
-      let stations = [];
+      let stationsWithLines = [];
       let stationFetchPromises = [];
       let stationIdsSeen = [];
 
@@ -65,18 +65,16 @@ export function getStations(lines) {
             Array.from(jsonResponses[i]).forEach(station => {
               if (!stationIdsSeen.includes(station.id)) {
                 stationIdsSeen.push(station.id);
-                stations.push(simplifyStation(station));
+                stationsWithLines.push(simplifyStation(station));
               }
-              // Whether or not the sation has been seen before, it serves
-              // the line in question.
-              stations = addLineToAnyMatchingStations(
-                stations,
+              stationsWithLines = addLineToAnyMatchingStations(
+                stationsWithLines,
                 station.id,
                 lines[i]);
             })
           }
 
-          resolve(stations);
+          resolve(stationsWithLines);
         })
         .catch(err => reject(err));
 
