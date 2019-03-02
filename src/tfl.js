@@ -32,7 +32,8 @@ export function getLines() {
 function simplifyLine(line) {
   return {
     id: line.id,
-    name: line.name
+    name: line.name,
+    arrivals: []
   };
 }
 
@@ -60,14 +61,20 @@ export function getStations(lines) {
       Promise.all(stationFetchPromises)
         .then(jsonResponses => {
 
-          jsonResponses.forEach(json => {
-            Array.from(json).forEach(station => {
+          for (let i = 0; i < jsonResponses.length; i++) {
+            Array.from(jsonResponses[i]).forEach(station => {
               if (!stationIdsSeen.includes(station.id)) {
                 stationIdsSeen.push(station.id);
                 stations.push(simplifyStation(station));
               }
+              // Whether or not the sation has been seen before, it serves
+              // the line in question.
+              stations = addLineToAnyMatchingStations(
+                stations,
+                station.id,
+                lines[i]);
             })
-          })
+          }
 
           resolve(stations);
         })
@@ -82,8 +89,15 @@ function simplifyStation(station) {
     " Underground Station", "");
   return {
     id: station.id,
-    name: cleanedName
+    name: cleanedName,
+    lines: []
   };
+}
+
+function addLineToAnyMatchingStations(stations, stationId, line) {
+  let indexOfMatchingStation = stations.findIndex(station => station.id == stationId);
+  stations[indexOfMatchingStation].lines.push(line);
+  return stations;
 }
 
 export function getLineArrivals(stationId) {
@@ -235,6 +249,7 @@ export function updateLineArrivalsOnStations(stations) {
   )
 }
 
+// TODO: Upddate this to resetLineArrivalsOnStations(stations)
 export function removeLinesFromStations(stations) {
   let stationsWithoutLines = [];
 
