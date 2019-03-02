@@ -247,18 +247,18 @@ export function updateLineArrivalsOnStations(stations) {
   )
 }
 
-export function resetArrivalsOnStations(stations) {
-  let stationsWithoutArrivals = [];
+export function resetLineArrivalsOnStations(stations) {
+  let stationsWithoutLineArrivals = [];
 
   stations.forEach(station => {
-    stationsWithoutArrivals.push ({
+    stationsWithoutLineArrivals.push ({
       id: station.id,
       name: station.name,
       lines: resetArrivalsOnLines(station.lines)
     });
   });
 
-  return(stationsWithoutArrivals);
+  return(stationsWithoutLineArrivals);
 }
 
 function resetArrivalsOnLines(lines) {
