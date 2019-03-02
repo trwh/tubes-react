@@ -81,8 +81,8 @@ class App extends Component {
   }
 
   setStationCookie(stations) {
-    let stationsWithoutLines = tfl.removeLinesFromStations(stations);
-    cookies.set("stations", stationsWithoutLines, {
+    let stationsWithoutArrivals = tfl.resetArrivalsOnStations(stations);
+    cookies.set("stations", stationsWithoutArrivals, {
         path: "/",
         maxAge: 99999999
       }
