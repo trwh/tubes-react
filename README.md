@@ -31,9 +31,9 @@ The app relies on a prepopulated list of tube stations in `/src/stations.json` t
 The file is created with output from the functions I've written and `export`ed in `/src/tfl.js`. The relevant functions will be run in the right order if you uncomment this block in the main React `App` `constructor`,
 
 ```
-    tfl.getLines()
-      .then(lines => tfl.getStations(lines))
-      .then(stations => console.log("Tube stations from API: " + JSON.stringify(stations)))
+    tfl.getLinesFromTflApi()
+      .then(lines => tfl.getStationsWithLinesFromTflApi(lines))
+      .then(stationsWithLines => console.log("Tube stations from API: " + JSON.stringify(stationsWithLines)))
       .catch(err => console.log(err));
 ```
 
