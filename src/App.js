@@ -31,6 +31,8 @@ class App extends Component {
     setTimeout(() => {
       this.periodicallyRefresh();
     }, 0);
+
+    console.log(tfl.getAllLineStatuses());
   }
 
   periodicallyRefresh() {
