@@ -264,3 +264,47 @@ export function resetLineArrivalsOnStations(stations) {
 function resetArrivalsOnLines(lines) {
   return lines.map(simplifyLine);
 }
+
+// TODO
+export function getAllLineStatuses() {
+  return new Promise(
+    function(resolve, reject) {
+
+      let allLinesWithStatuses = [];
+
+      fetch("https://api.tfl.gov.uk/line/mode/tube/status")
+        .then(response => {
+          if(response.ok) {
+            return response.json();
+          } else {
+            throw new Error("Error getting tube line status from TFL API.");
+          }
+        })
+        .then(json => {
+          json.forEach(lineWithStatus => {
+            allLinesWithStatuses.push(
+              simplifyLineWithStatus(lineWithStatus))
+          })
+
+          resolve(allLinesWithStatuses);
+        })
+        .catch(err => reject(err));
+
+    }
+  )
+}
+
+function simplifyLineWithStatus(lineWithStatus) {
+  let reason = (lineWithStatus.lineStatuses[0].reason ?
+    lineWithStatus.lineStatuses[0].reason : "");
+
+  // TODO: cleanedReason = reason.
+
+  return {
+    id: lineWithStatus.id,
+    name: lineWithStatus.name,
+    status: lineWithStatus.lineStatuses[0].statusSeverityDescription,
+    statusLevel: lineWithStatus.lineStatuses[0].statusSeverity,
+    statusReason: reason
+  };
+}
