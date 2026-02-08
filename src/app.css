@@ -1,0 +1,495 @@
+/* ===================================================================
+   tubes-react — Dark theme, TFL-inspired
+   =================================================================== */
+
+/* --- Fonts -------------------------------------------------------- */
+@font-face {
+  font-family: "Johnston100";
+  font-weight: 300;
+  font-display: swap;
+  src:
+    url("https://tfl.gov.uk/cdn/static/assets/fonts/Johnston100-Light.woff2")
+      format("woff2"),
+    url("https://tfl.gov.uk/cdn/static/assets/fonts/Johnston100-Light.woff")
+      format("woff");
+}
+
+@font-face {
+  font-family: "Johnston100";
+  font-weight: 400;
+  font-display: swap;
+  src:
+    url("https://tfl.gov.uk/cdn/static/assets/fonts/Johnston100-Regular.woff2")
+      format("woff2"),
+    url("https://tfl.gov.uk/cdn/static/assets/fonts/Johnston100-Regular.woff")
+      format("woff");
+}
+
+@font-face {
+  font-family: "Johnston100";
+  font-weight: 500;
+  font-display: swap;
+  src:
+    url("https://tfl.gov.uk/cdn/static/assets/fonts/Johnston100-Medium.woff2")
+      format("woff2"),
+    url("https://tfl.gov.uk/cdn/static/assets/fonts/Johnston100-Medium.woff")
+      format("woff");
+}
+
+/* --- Reset & base ------------------------------------------------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --bg: #1a1d23;
+  --surface: #242830;
+  --surface-hover: #2c313a;
+  --border: #3a3e47;
+  --text: #cfd1d6;
+  --text-muted: #888c96;
+  --text-bright: #e8eaed;
+  --accent: #5a9aca;
+  --accent-hover: #7ab4da;
+  --danger: #dc241f;
+  --warning: #e8a230;
+  --success: #3a8a4a;
+
+  /* Official TFL line colours */
+  --line-bakerloo: #b26300;
+  --line-central: #dc241f;
+  --line-circle: #ffc80a;
+  --line-district: #007d32;
+  --line-hammersmith-city: #f589a6;
+  --line-jubilee: #838d93;
+  --line-metropolitan: #9b0058;
+  --line-northern: #a0a5a9;
+  --line-piccadilly: #0019a8;
+  --line-victoria: #039be5;
+  --line-waterloo-city: #76d0bd;
+}
+
+html {
+  font-family:
+    "Johnston100",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    Helvetica,
+    Arial,
+    sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  min-height: 100vh;
+}
+
+/* --- Layout ------------------------------------------------------- */
+.app {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+}
+
+/* --- Header ------------------------------------------------------- */
+.header {
+  margin-bottom: 24px;
+}
+
+.header h1 {
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--text-bright);
+  letter-spacing: -0.01em;
+}
+
+.header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.refresh-btn {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  padding: 6px 14px;
+  border-radius: 4px;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    color 0.15s;
+  white-space: nowrap;
+}
+
+.refresh-btn:hover {
+  border-color: var(--text-muted);
+  color: var(--text);
+}
+
+/* --- Disruptions section ------------------------------------------ */
+.disruptions-section {
+  margin-top: 8px;
+}
+
+.disruptions-hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin-bottom: 16px;
+}
+
+.disruptions-heading {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-bright);
+  margin-bottom: 10px;
+}
+
+.disruptions-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.disruption-item {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 8px 12px;
+  background: var(--surface);
+  border-radius: 4px;
+  border-left: 3px solid var(--text-muted);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.disruption-line-name {
+  font-weight: 500;
+  color: var(--text-bright);
+  white-space: nowrap;
+}
+
+.disruption-status {
+  color: var(--text-muted);
+}
+
+/* --- Search ------------------------------------------------------- */
+.search-section {
+  margin-bottom: 24px;
+  position: relative;
+}
+
+.search-input {
+  width: 100%;
+  padding: 10px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text-bright);
+  font: inherit;
+  font-size: 15px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.search-input::placeholder {
+  color: var(--text-muted);
+}
+
+.search-input:focus {
+  border-color: var(--accent);
+}
+
+.dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  max-height: 260px;
+  overflow-y: auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+}
+
+.dropdown-item {
+  padding: 10px 14px;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--text);
+  transition: background 0.1s;
+}
+
+.dropdown-item:hover {
+  background: var(--surface-hover);
+  color: var(--text-bright);
+}
+
+/* --- Error banner ------------------------------------------------- */
+.error-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  background: rgba(220, 36, 31, 0.12);
+  border: 1px solid rgba(220, 36, 31, 0.3);
+  border-radius: 4px;
+  color: #f0a0a0;
+  font-size: 13px;
+}
+
+.error-banner button {
+  background: none;
+  border: none;
+  color: #f0a0a0;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  padding: 0 2px;
+}
+
+/* --- Station cards ------------------------------------------------ */
+.stations-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.station-card {
+  background: var(--surface);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.station-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.station-name {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-bright);
+}
+
+.station-remove {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  padding: 2px 4px;
+  transition: color 0.15s;
+}
+
+.station-remove:hover {
+  color: var(--danger);
+}
+
+.station-loading {
+  padding: 16px 14px;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.station-error {
+  padding: 16px 14px;
+  color: #f0a0a0;
+  font-size: 13px;
+}
+
+/* --- Line sections within a station ------------------------------- */
+.line-section {
+  border-bottom: 1px solid var(--border);
+}
+
+.line-section:last-child {
+  border-bottom: none;
+}
+
+.line-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+}
+
+.line-colour {
+  width: 4px;
+  height: 20px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.line-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-bright);
+}
+
+.line-status-badge {
+  margin-left: auto;
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 3px;
+  white-space: nowrap;
+}
+
+.line-status-badge.good-service {
+  background: rgba(58, 138, 74, 0.2);
+  color: #6cc080;
+}
+
+.line-status-badge.minor-delays {
+  background: rgba(232, 162, 48, 0.2);
+  color: var(--warning);
+}
+
+.line-status-badge.severe-delays {
+  background: rgba(220, 36, 31, 0.2);
+  color: #f07070;
+}
+
+.line-status-badge.disrupted {
+  background: rgba(220, 36, 31, 0.15);
+  color: #f07070;
+}
+
+/* --- Arrivals table ----------------------------------------------- */
+.arrivals-list {
+  list-style: none;
+  padding: 0 14px 6px;
+}
+
+.arrival-row {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding: 5px 0;
+  font-size: 13px;
+  border-bottom: 1px solid rgba(58, 62, 71, 0.5);
+}
+
+.arrival-row:last-child {
+  border-bottom: none;
+}
+
+.arrival-time {
+  font-weight: 500;
+  color: var(--text-bright);
+  min-width: 40px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.arrival-towards {
+  color: var(--text);
+  flex: 1;
+  min-width: 0;
+}
+
+.arrival-location {
+  color: var(--text-muted);
+  font-size: 12px;
+  text-align: right;
+  flex-shrink: 0;
+  max-width: 40%;
+}
+
+/* --- Empty state -------------------------------------------------- */
+.empty-state {
+  text-align: center;
+  padding: 48px 16px;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+/* --- Footer ------------------------------------------------------- */
+.footer {
+  margin-top: 32px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.8;
+}
+
+.footer a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.footer a:hover {
+  text-decoration: underline;
+}
+
+/* --- Clear button ------------------------------------------------- */
+.clear-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 4px 0;
+  transition: color 0.15s;
+}
+
+.clear-btn:hover {
+  color: var(--danger);
+}
+
+.actions-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 12px;
+}
+
+/* --- Scrollbar (subtle) ------------------------------------------- */
+.dropdown::-webkit-scrollbar {
+  width: 6px;
+}
+
+.dropdown::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.dropdown::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+
+/* --- Responsive --------------------------------------------------- */
+@media (max-width: 480px) {
+  .app {
+    padding: 16px 12px 40px;
+  }
+
+  .arrival-location {
+    display: none;
+  }
+}

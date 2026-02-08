@@ -7,6 +7,7 @@ This document provides coding guidelines and conventions for AI agents working o
 A React 18 application that displays live London tube arrival times using Transport for London's public API. Built with Vite and uses functional components with hooks.
 
 **Key Architecture:**
+
 - Frontend fetches live arrival data from TFL API every 30 seconds
 - Station list is preloaded from `/src/stations.json` (270 stations)
 - User's selected stations are persisted in localStorage
@@ -16,6 +17,7 @@ A React 18 application that displays live London tube arrival times using Transp
 ## Build, Lint, and Test Commands
 
 ### Standard Commands
+
 ```bash
 npm install          # Install dependencies
 npm run dev          # Start development server (localhost:3000)
@@ -26,6 +28,7 @@ npm run format       # Format code with Prettier
 ```
 
 ### Running a Single Test
+
 ```bash
 # No test framework is currently installed. When adding tests, use Vitest:
 # npx vitest run <filename>
@@ -49,6 +52,7 @@ Run `npm run format` to auto-format. Run `npm run lint` to check for issues.
 ### Import Conventions
 
 **Order:**
+
 1. React hooks and libraries
 2. Third-party libraries
 3. Local modules (relative imports)
@@ -56,6 +60,7 @@ Run `npm run format` to auto-format. Run `npm run lint` to check for issues.
 5. CSS files
 
 **Examples:**
+
 ```javascript
 import { useState, useEffect, useCallback } from "react";
 import * as tfl from "./tfl.js";
@@ -63,6 +68,7 @@ import masterStations from "./stations.json";
 ```
 
 **Prefer:**
+
 - Named exports for utility functions: `export function functionName()`
 - Default export for the main component: `export default App`
 - Use `import * as namespace` for modules with multiple exports
@@ -71,6 +77,7 @@ import masterStations from "./stations.json";
 ### Component Structure
 
 **Use functional components with hooks:**
+
 ```javascript
 function ComponentName({ prop1, prop2 }) {
   const [value, setValue] = useState(initialValue);
@@ -88,6 +95,7 @@ function ComponentName({ prop1, prop2 }) {
 ```
 
 **Component organization:**
+
 1. Hook declarations (`useState`, `useRef`)
 2. Effects (`useEffect`)
 3. Event handlers and helper functions
@@ -98,13 +106,16 @@ function ComponentName({ prop1, prop2 }) {
 ### Naming Conventions
 
 **Variables/Functions:** camelCase
+
 - `masterStations`, `filteredStations`, `userStations`
 - `filterChange()`, `addUserStation()`, `updateLineArrivalsOnStations()`
 
 **Components:** PascalCase
+
 - `App`, `UserStationList`, `ArrivalsBoard`, `FilteredStationList`
 
 **Constants:** UPPER_SNAKE_CASE for module-level constants
+
 - `const REFRESH_INTERVAL_MS = 30000;`
 
 **Files:** Components use `.jsx` extension; plain JS modules use `.js`
@@ -121,8 +132,10 @@ validation. Consider adding PropTypes for new components.
 ### Error Handling
 
 **Promises:** Use `.catch()` for error handling:
+
 ```javascript
-tfl.updateLineArrivalsOnStations(stations)
+tfl
+  .updateLineArrivalsOnStations(stations)
   .then((updatedStations) => {
     setUserStations(updatedStations);
   })
@@ -130,15 +143,15 @@ tfl.updateLineArrivalsOnStations(stations)
 ```
 
 **API calls:** Check `response.ok` before processing:
+
 ```javascript
-fetch(url)
-  .then((response) => {
-    if (response.ok) {
-      return response.json();
-    } else {
-      throw new Error("Error message with context");
-    }
-  })
+fetch(url).then((response) => {
+  if (response.ok) {
+    return response.json();
+  } else {
+    throw new Error("Error message with context");
+  }
+});
 ```
 
 ### State Management
@@ -146,6 +159,7 @@ fetch(url)
 **Local state only:** No Redux/Context. Use `useState` hooks and props.
 
 **Immutability:** Create new arrays/objects rather than mutating:
+
 ```javascript
 const newUserStations = userStations.concat(station);
 ```
@@ -153,6 +167,7 @@ const newUserStations = userStations.concat(station);
 ### Async Patterns
 
 **tfl.js uses explicit Promises** (not async/await):
+
 ```javascript
 export function functionName() {
   return new Promise(function (resolve, reject) {
@@ -163,9 +178,12 @@ export function functionName() {
 ```
 
 **Promise.all** for parallel operations:
+
 ```javascript
 Promise.all(stationFetchPromises)
-  .then((jsonResponses) => { /* ... */ })
+  .then((jsonResponses) => {
+    /* ... */
+  })
   .catch((err) => reject(err));
 ```
 

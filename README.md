@@ -1,14 +1,15 @@
 NB: This project is a work in progress - the UI is currently unstyled! Check back for updates, or star this repo to be notified automatically.
 
 # [TFL Arrivals](https://tubes.org.uk)
+
 A simple React app which displays London tube arrival times provided by [Transport for London's public API](https://api.tfl.gov.uk/).
 
 Because it's not straightforward to get a list of tube stations from the TFL API, a list of stations and their IDs is provided in `/src/stations.json` and is included in the build. Live arrival times are then fetched by the app from the TFL API using these station IDs and refreshed every 30s. The TFL API doesn't require authentication.
 
 ### Built With
 
-* [Create React App](https://github.com/facebook/create-react-app)
-* [universal-cookie](https://github.com/reactivestack/cookies/tree/master/packages/universal-cookie)
+- [Create React App](https://github.com/facebook/create-react-app)
+- [universal-cookie](https://github.com/reactivestack/cookies/tree/master/packages/universal-cookie)
 
 ### Installation
 
@@ -16,6 +17,7 @@ Because it's not straightforward to get a list of tube stations from the TFL API
 npm install
 npm start
 ```
+
 Visit http://localhost:3000 to view TFL Arrivals!
 
 ### Deploy to production
