@@ -4,7 +4,7 @@ This document provides coding guidelines and conventions for AI agents working o
 
 ## Project Overview
 
-A React application that displays live London tube arrival times using Transport for London's public API. Built with Create React App (React 16.8.1) and uses class-based components with lifecycle methods.
+A React 18 application that displays live London tube arrival times using Transport for London's public API. Built with Vite and uses functional components with hooks.
 
 **Key Architecture:**
 - Frontend fetches live arrival data from TFL API every 30 seconds
@@ -18,93 +18,82 @@ A React application that displays live London tube arrival times using Transport
 ### Standard Commands
 ```bash
 npm install          # Install dependencies
-npm start           # Start development server (localhost:3000)
-npm run build       # Build for production (outputs to /build)
-npm test            # Run tests in interactive watch mode
+npm run dev          # Start development server (localhost:3000)
+npm run build        # Build for production (outputs to /dist)
+npm run preview      # Preview production build locally
+npm run lint         # Run ESLint
+npm run format       # Format code with Prettier
 ```
 
 ### Running a Single Test
 ```bash
-# Run a specific test file
-npm test -- <filename>
-
-# Run tests matching a pattern
-npm test -- --testNamePattern="<pattern>"
-
-# Run tests without watch mode
-CI=true npm test
+# No test framework is currently installed. When adding tests, use Vitest:
+# npx vitest run <filename>
+# npx vitest run --testNamePattern="<pattern>"
 ```
 
-Note: This project currently has no test files. When adding tests, follow Jest and React Testing Library conventions.
+Note: This project currently has no test files.
 
 ## Code Style Guidelines
+
+### Formatting (enforced by Prettier)
+
+- **Indentation:** 2 spaces (no tabs)
+- **Semicolons:** Required
+- **Quotes:** Double quotes for strings and JSX attributes
+- **Trailing commas:** All (ES5+ positions)
+- **Line length:** Prettier default (80 chars, with flexibility)
+
+Run `npm run format` to auto-format. Run `npm run lint` to check for issues.
 
 ### Import Conventions
 
 **Order:**
-1. React imports
+1. React hooks and libraries
 2. Third-party libraries
 3. Local modules (relative imports)
 4. JSON data files
-5. CSS files (currently commented out)
+5. CSS files
 
 **Examples:**
 ```javascript
-import React, { Component } from 'react';
-import * as tfl from './tfl.js';
-const masterStations = require("./stations.json");
-// import './App.css';
+import { useState, useEffect, useCallback } from "react";
+import * as tfl from "./tfl.js";
+import masterStations from "./stations.json";
 ```
 
 **Prefer:**
 - Named exports for utility functions: `export function functionName()`
-- Default export for main component: `export default App`
+- Default export for the main component: `export default App`
 - Use `import * as namespace` for modules with multiple exports
-
-### Formatting
-
-**Indentation:** 2 spaces (no tabs)
-
-**Semicolons:** Required at end of statements
-
-**Quotes:** Double quotes for strings, JSX attributes
-
-**Spacing:**
-- Space after keywords: `if (condition)`, `function (params)`
-- No space before function parentheses in definitions: `function simplifyLine(line)`
-- Space around operators: `a + b`, `x === y`
-
-**Line Length:** Reasonable limits (~80-100 chars where practical)
+- Use ES module `import` syntax (not `require()`)
 
 ### Component Structure
 
-**Use class-based components** (legacy React 16.8 style):
+**Use functional components with hooks:**
 ```javascript
-class ComponentName extends Component {
-  constructor(props) {
-    super(props);
-    this.state = { /* ... */ };
-    this.methodName = this.methodName.bind(this);
+function ComponentName({ prop1, prop2 }) {
+  const [value, setValue] = useState(initialValue);
+
+  useEffect(() => {
+    // side effect on mount
+  }, []);
+
+  function handleEvent() {
+    // event handler
   }
-  
-  componentDidMount() { /* ... */ }
-  
-  methodName() { /* ... */ }
-  
-  render() { /* ... */ }
+
+  return <div>{/* JSX */}</div>;
 }
 ```
 
-**Method binding:** Bind event handlers in constructor:
-```javascript
-this.filterChange = this.filterChange.bind(this);
-```
-
 **Component organization:**
-1. Constructor with state initialization and bindings
-2. Lifecycle methods (componentDidMount, etc.)
-3. Custom methods
-4. render() method last
+1. Hook declarations (`useState`, `useRef`)
+2. Effects (`useEffect`)
+3. Event handlers and helper functions
+4. Return JSX
+
+**Props:** Use destructuring in function parameters.
 
 ### Naming Conventions
 
@@ -115,46 +104,36 @@ this.filterChange = this.filterChange.bind(this);
 **Components:** PascalCase
 - `App`, `UserStationList`, `ArrivalsBoard`, `FilteredStationList`
 
-**Constants:** camelCase (not UPPER_CASE in this codebase)
-- `const masterStations = require("./stations.json")`
+**Constants:** UPPER_SNAKE_CASE for module-level constants
+- `const REFRESH_INTERVAL_MS = 30000;`
 
-**Boolean prefixes:** Use descriptive names without strict is/has prefix requirement
-- State properties: `filterValue` (not `isFilterValue`)
-
-**Private functions:** No underscore prefix; use module scope for privacy
+**Files:** Components use `.jsx` extension; plain JS modules use `.js`
 
 ### Type System
 
-**TypeScript:** Not used. This is plain JavaScript (ES6+).
+**TypeScript:** Not used. Plain JavaScript (ES module).
 
-**PropTypes:** Not currently implemented, but recommended for new components:
-```javascript
-import PropTypes from 'prop-types';
+**Editor support:** `jsconfig.json` is configured for IntelliSense.
 
-ComponentName.propTypes = {
-  stations: PropTypes.array.isRequired,
-  onClick: PropTypes.func
-};
-```
-
-**Type checking:** Rely on ESLint (extends react-app) for basic validation
+**PropTypes:** Not currently implemented, but ESLint warns on missing prop
+validation. Consider adding PropTypes for new components.
 
 ### Error Handling
 
-**Promises:** Use `.catch()` for error handling
+**Promises:** Use `.catch()` for error handling:
 ```javascript
-tfl.updateLineArrivalsOnStations(this.state.userStations)
-  .then(updatedStations => {
-    this.setState({ userStations: updatedStations });
+tfl.updateLineArrivalsOnStations(stations)
+  .then((updatedStations) => {
+    setUserStations(updatedStations);
   })
-  .catch(err => console.log(err));
+  .catch((err) => console.log(err));
 ```
 
-**API calls:** Check response.ok before processing:
+**API calls:** Check `response.ok` before processing:
 ```javascript
 fetch(url)
-  .then(response => {
-    if(response.ok) {
+  .then((response) => {
+    if (response.ok) {
       return response.json();
     } else {
       throw new Error("Error message with context");
@@ -162,98 +141,54 @@ fetch(url)
   })
 ```
 
-**Console logging:** Use `console.log()` for errors (no structured logging library)
-
-**User-facing errors:** Currently logged to console; consider adding UI feedback for production
-
 ### State Management
 
-**Local state only:** No Redux/Context. Use component state and props.
-
-**setState callbacks:** Use when actions depend on state update completion:
-```javascript
-this.setState({ userStations: newUserStations }, () => {
-  this.clearFilterValue();
-  this.updateUserStationLineArrivals();
-});
-```
+**Local state only:** No Redux/Context. Use `useState` hooks and props.
 
 **Immutability:** Create new arrays/objects rather than mutating:
 ```javascript
-let newUserStations = this.state.userStations.concat(station);
+const newUserStations = userStations.concat(station);
 ```
 
 ### Async Patterns
 
-**Use Promises** (not async/await in current codebase):
+**tfl.js uses explicit Promises** (not async/await):
 ```javascript
 export function functionName() {
-  return new Promise(
-    function(resolve, reject) {
-      // async work
-      resolve(data);
-    }
-  )
+  return new Promise(function (resolve, reject) {
+    // async work
+    resolve(data);
+  });
 }
 ```
 
 **Promise.all** for parallel operations:
 ```javascript
 Promise.all(stationFetchPromises)
-  .then(jsonResponses => { /* ... */ })
-  .catch(err => reject(err));
+  .then((jsonResponses) => { /* ... */ })
+  .catch((err) => reject(err));
 ```
 
 ## File Organization
 
 ```
+index.html           # HTML entry point (Vite convention)
+vite.config.js       # Vite build configuration
+eslint.config.js     # ESLint flat config
+.prettierrc          # Prettier configuration
+jsconfig.json        # Editor IntelliSense config
 src/
-  App.js           # Main component with state management
-  index.js         # React entry point
-  tfl.js           # TFL API utilities (exported functions)
-  stations.json    # Preloaded station data (270 stations)
-public/
-  index.html       # HTML template
-  manifest.json    # PWA manifest
-```
-
-## Testing Guidelines
-
-When adding tests:
-- Use Jest (included with react-scripts)
-- Place test files adjacent to source: `Component.test.js`
-- Test component rendering, user interactions, and API responses
-- Mock fetch calls for TFL API tests
-
-## Common Patterns
-
-**Filtering arrays:**
-```javascript
-filteredStations = filteredStations.filter((station) => {
-  return station.name.toLowerCase().search(
-    e.target.value.toLowerCase().trim()) !== -1;
-});
-```
-
-**Mapping for React rendering:**
-```javascript
-{this.props.stations.map(station => (
-  <div key={station.id}>
-    {station.name}
-  </div>
-))}
-```
-
-**LocalStorage persistence:**
-```javascript
-localStorage.setItem("key", JSON.stringify(data));
-const data = JSON.parse(localStorage.getItem("key"));
+  App.jsx            # Main component and child components
+  index.jsx          # React entry point (createRoot)
+  tfl.js             # TFL API utilities (exported functions)
+  stations.json      # Preloaded station data (270 stations)
 ```
 
 ## Notes for Agents
 
-- UI is currently unstyled (CSS imports commented out) - work in progress
+- UI is currently unstyled - work in progress
 - Station list regeneration instructions in README.md if TFL adds stations
-- Refresh interval: 30 seconds (hardcoded in App.js:43)
-- ESLint config extends "react-app" (package.json:16-18)
-- Target browsers defined in browserslist (package.json:19-24)
+- Refresh interval: 30 seconds (`REFRESH_INTERVAL_MS` in `src/App.jsx:5`)
+- ESLint uses flat config format (`eslint.config.js`)
+- Vite dev server runs on port 3000 (configured in `vite.config.js`)
+- Build output goes to `dist/` (not `build/`)
