@@ -23,7 +23,7 @@ function App() {
     tfl
       .updateLineArrivalsOnStations(stations)
       .then((updatedStations) => {
-        setUserStations(updatedStations);
+        setUserStations([...updatedStations]);
       })
       .catch((err) => console.log(err));
   }, []);
