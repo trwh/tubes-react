@@ -240,24 +240,28 @@ function DisruptionsBar({ lineStatuses }) {
     (line) => line.status !== "Good Service",
   );
 
-  if (disruptions.length === 0) return null;
-
   return (
     <div className="disruptions-section">
       <hr className="disruptions-hr" />
-      <h2 className="disruptions-heading">Current Disruptions</h2>
-      <div className="disruptions-bar">
-        {disruptions.map((line) => (
-          <div
-            key={line.id}
-            className="disruption-item"
-            style={{ borderLeftColor: getLineColour(line.id) }}
-          >
-            <span className="disruption-line-name">{line.name}</span>
-            <span className="disruption-status">{line.status}</span>
-          </div>
-        ))}
-      </div>
+      <h2 className="disruptions-heading">Line Status</h2>
+      {lineStatuses.length === 0 ? (
+        <p className="good-service-message">Loading line status...</p>
+      ) : disruptions.length === 0 ? (
+        <p className="good-service-message">Good Service on all lines.</p>
+      ) : (
+        <div className="disruptions-bar">
+          {disruptions.map((line) => (
+            <div
+              key={line.id}
+              className="disruption-item"
+              style={{ borderLeftColor: getLineColour(line.id) }}
+            >
+              <span className="disruption-line-name">{line.name}</span>
+              <span className="disruption-status">{line.status}</span>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
