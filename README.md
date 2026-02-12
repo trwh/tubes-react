@@ -1,6 +1,6 @@
 NB: This project is a work in progress - the UI is currently unstyled! Check back for updates, or star this repo to be notified automatically.
 
-# [TFL Arrivals](https://tubes.org.uk)
+# [TFL Live Tube Departures Board](https://tubes.org.uk)
 
 A simple React app which displays London tube arrival times provided by [Transport for London's public API](https://api.tfl.gov.uk/).
 
