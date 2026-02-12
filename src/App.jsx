@@ -12,7 +12,7 @@ const LINE_COLOURS = {
   "hammersmith-city": "#f589a6",
   jubilee: "#838d93",
   metropolitan: "#9b0058",
-  northern: "#a0a5a9",
+  northern: "#000000",
   piccadilly: "#0019a8",
   victoria: "#039be5",
   "waterloo-city": "#76d0bd",
@@ -156,7 +156,7 @@ function App() {
     <div className="app">
       <header className="header">
         <div className="header-row">
-          <h1>Tube Arrivals</h1>
+          <h1>Live Tube Departures Board</h1>
           <button
             className="refresh-btn"
             onClick={updateUserStationLineArrivals}
